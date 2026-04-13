@@ -1,0 +1,171 @@
+.trip-card {
+  cursor: pointer;
+  position: relative;
+}
+
+.trip-card-inner {
+  background: hsl(0 0% 100% / 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px hsl(0 0% 0% / 0.06);
+  border: 1px solid hsl(0 0% 0% / 0.06);
+  transition: all 0.3s ease;
+}
+
+.trip-card:hover .trip-card-inner {
+  box-shadow: 0 12px 40px hsl(0 0% 0% / 0.12);
+  border-color: hsl(var(--primary) / 0.2);
+  transform: translateY(-6px) scale(1.02);
+}
+
+.trip-card-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+
+.trip-card-status--booked {
+  background: hsl(var(--secondary) / 0.1);
+  color: hsl(var(--secondary));
+  border-color: hsl(var(--secondary) / 0.2);
+}
+
+.trip-card-status--done {
+  background: hsl(142 76% 95%);
+  color: hsl(142 71% 45%);
+  border-color: hsl(142 76% 80%);
+}
+
+.trip-card-status--cancelled {
+  background: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.2);
+}
+
+.trip-card-route {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.trip-card-route-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: hsl(var(--primary-foreground));
+}
+
+.trip-card-route-names {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.trip-card-route-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: hsl(var(--foreground));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-card-route-arrow {
+  width: 1rem;
+  height: 1rem;
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+}
+
+.trip-card-bus-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  margin-left: 2.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.trip-card-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.trip-card-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trip-card-meta-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.trip-card-meta-label span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trip-card-meta-label svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.trip-card-meta-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.trip-card-meta-fare {
+  text-align: right;
+}
+
+.trip-card-fare-value {
+  font-size: 1.125rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+.trip-card-departure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(0 0% 0% / 0.06);
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.trip-card-departure-date {
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.trip-card-seats-left {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}

@@ -1,0 +1,102 @@
+.landing-page {
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  min-height: 85vh !important;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, hsl(0 0% 100%), hsl(0 0% 100% / 0.6), transparent);
+}
+
+.hero-content {
+  position: relative;
+  max-width: 32rem !important;
+  margin-bottom: 2.5rem;
+  font-family: var(--font-display);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 3.5rem;
+  line-height: 1.1;
+  color: hsl(0 0% 8%);
+  margin-bottom: 1rem;
+}
+
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, hsl(0 89% 41%), hsl(24 100% 50%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: hsl(0 0% 40%);
+  max-width: 28rem;
+  
+}
+
+/* Results Section */
+.results-section {
+  padding: 5rem 0;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: hsl(0 89% 41%);
+  font-family: var(--font-display);
+}
+
+.section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: hsl(0 0% 8%);
+  margin-top: 0.5rem;
+}
+
+.trips-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .trips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-title {
+    font-size: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .trips-grid.search-results {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
