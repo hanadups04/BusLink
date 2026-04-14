@@ -11,6 +11,7 @@ const MyBookingsPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+   const [selectedBooking, setSelectedBooking] = useState(null);
 
   // const bookings = getBookings();
 
@@ -27,6 +28,44 @@ const MyBookingsPage = () => {
   // }, [bookings, searchQuery, statusFilter]);
 
   const statuses = ["all", "Booked", "Done", "Cancelled"];
+
+
+    // Receipts view
+  if (selectedBooking) {
+    return (
+      <div className="my-bookings-page">
+        <Navbar />
+        <div className="pt-28 pb-20 container mx-auto px-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bookings-header mb-10">
+            <button
+              onClick={() => setSelectedBooking(null)}
+              className="bookings-back-btn"
+            >
+              <ArrowLeft style={{ width: 16, height: 16 }} />
+              Back to Bookings
+            </button>
+            <span className="label">Booking {selectedBooking.id}</span>
+            <h1>{selectedBooking.trip.origin} → {selectedBooking.trip.destination}</h1>
+            {selectedBooking.trip.busName && (
+              <p style={{ color: "hsl(0 0% 40%)", marginTop: "0.25rem" }}>{selectedBooking.trip.busName}</p>
+            )}
+          </motion.div>
+
+          <div className="bookings-receipts-grid">
+            {selectedBooking.passengers.map((passenger, i) => (
+              <Receipt
+                key={i}
+                trip={selectedBooking.trip}
+                passenger={passenger}
+                index={i}
+              />
+            ))}
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="my-bookings-page">
@@ -78,13 +117,8 @@ const MyBookingsPage = () => {
           {/* {filtered.length > 0 ? (
               <div className="bookings-grid">
                 {filtered.map((booking, i) => (
-                  <TripCard
-                    key={booking.id}
-                    trip={booking.trip}
-                    index={i}
-                    status={booking.status}
-                    onClick={() => {}}
-                  />
+                                    <TripCard key={booking.id} trip={booking.trip} index={i} status={booking.status} onClick={() => setSelectedBooking(booking)} />
+
                 ))}
               </div>
             ) : (
