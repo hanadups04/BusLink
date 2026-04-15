@@ -55,19 +55,20 @@ export async function createBooking(data) {
 }
 
 export async function getTrips() {
-  const { data, error } = await supabase.from("trips_tbl").select(`
+  const { data, error } = await supabase.from("trips").select(`
       id,
       fare,
       distance,
-      origin:cities_tbl!trips_tbl_origin_fkey (id, name),
-      destination:cities_tbl!trips_tbl_destination_fkey (id, name)
+      departure_time,
+      origin:city!trips_origin_fkey (city_name),
+      destination:city!trips_destination_fkey (city_name)
     `);
 
   if (error) {
     console.log("error moy ay: ", error);
     return [];
   }
-
+  console.log("trip datas: ", data);
   return data;
 }
 

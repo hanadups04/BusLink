@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "motion/react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
@@ -6,24 +6,75 @@ import SearchBar from "../Components/SearchBar";
 import TripCard from "../Components/TripCard";
 // import { getAvailableTrips, searchTrips } from "../Backend/tripsData";
 import "./TripsPage.css";
+import * as Readfunctions from "../Backend/customer_funcs";
 
 const TripsPage = () => {
   const [filteredTrips, setFilteredTrips] = useState(null);
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function getData() {
+      try {
+        if (isMounted) {
+          const data = await Readfunctions.getTrips();
+          setTrips(data ?? []);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    getData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // const allTrips = useMemo(() => {
   //   return getAvailableTrips().sort((a, b) => a.origin.localeCompare(b.origin));
   // }, []);
 
-  // const displayTrips = filteredTrips ?? allTrips;
+  const displayTrips = filteredTrips ?? trips;
 
-  // const handleSearch = (origin, destination, date, pax) => {
-  //   if (!origin && !destination && !date) {
-  //     setFilteredTrips(null);
-  //     return;
-  //   }
-  //   const results = searchTrips(origin, destination, date, pax);
-  //   setFilteredTrips(results.sort((a, b) => a.origin.localeCompare(b.origin)));
-  // };
+  const handleSearch = (origin, destination) => {
+    if (!origin && !destination) {
+      setFilteredTrips(null);
+      return;
+    }
+
+    const normalizedOrigin = origin ? origin.toLowerCase() : null;
+    const normalizedDestination = destination
+      ? destination.toLowerCase()
+      : null;
+
+    const results = trips.filter((trip) => {
+      const tripOrigin = (trip.origin?.name || trip.origin || "").toLowerCase();
+      const tripDestination = (
+        trip.destination?.name ||
+        trip.destination ||
+        ""
+      ).toLowerCase();
+
+      const matchesOrigin = normalizedOrigin
+        ? tripOrigin.includes(normalizedOrigin)
+        : true;
+      const matchesDestination = normalizedDestination
+        ? tripDestination.includes(normalizedDestination)
+        : true;
+
+      return matchesOrigin && matchesDestination;
+    });
+
+    setFilteredTrips(results);
+  };
 
   return (
     <div className="trips-page">
@@ -43,19 +94,23 @@ const TripsPage = () => {
             </p>
           </motion.div>
           <div className="mb-10">
-            {/* <SearchBar onSearch={handleSearch} /> */}
+            <SearchBar onSearch={handleSearch} />
           </div>
-          {/* {displayTrips.length > 0 ? (
+          {loading ? (
+            <div className="empty-state">
+              <p>Loading trips...</p>
+            </div>
+          ) : displayTrips.length > 0 ? (
             <div className="trips-grid">
               {displayTrips.map((trip, i) => (
-                <TripCard key={trip.id} trip={trip} index={i} />
+                <TripCard key={i} trip={trip} index={i} />
               ))}
             </div>
           ) : (
             <div className="empty-state">
               <p>No trips match your criteria.</p>
             </div>
-          )} */}
+          )}
         </div>
       </div>
       <Footer />
