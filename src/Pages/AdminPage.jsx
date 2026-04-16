@@ -1,10 +1,22 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Bus, MapPin, Clock, Route, ArrowRight, Trash2, Edit3, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Plus,
+  X,
+  Bus,
+  MapPin,
+  Clock,
+  Route,
+  ArrowRight,
+  Trash2,
+  Edit3,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import SeatSelector from "../Components/SeatSelector";
-import { getTrips, addTrip, updateTripDepartureTime, cancelTrip, getTripBookings } from "../Backend/tripsData";
+// import { getTrips, addTrip, updateTripDepartureTime, cancelTrip, getTripBookings } from "../Backend/tripsData";
 import "./AdminPage.css";
 
 const emptyForm = {
@@ -32,11 +44,19 @@ const AdminPage = () => {
   const now = new Date();
 
   const upcomingTrips = useMemo(() => {
-    return trips.filter((t) => new Date(`${t.departureDate}T00:00:00`) >= new Date(now.toISOString().split("T")[0]));
+    return trips.filter(
+      (t) =>
+        new Date(`${t.departureDate}T00:00:00`) >=
+        new Date(now.toISOString().split("T")[0]),
+    );
   }, [trips]);
 
   const pastTrips = useMemo(() => {
-    return trips.filter((t) => new Date(`${t.departureDate}T00:00:00`) < new Date(now.toISOString().split("T")[0]));
+    return trips.filter(
+      (t) =>
+        new Date(`${t.departureDate}T00:00:00`) <
+        new Date(now.toISOString().split("T")[0]),
+    );
   }, [trips]);
 
   const showNotif = (msg, type) => {
@@ -44,26 +64,50 @@ const AdminPage = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleAddTrip = () => {
-    if (!formData.origin || !formData.destination || !formData.fare || !formData.departureDate || !formData.departureTime || !formData.busName) return;
+  const handleAddTrip2 = () => {
+    if (
+      !formData.origin ||
+      !formData.destination ||
+      !formData.fare ||
+      !formData.departureDate ||
+      !formData.departureTime ||
+      !formData.busName
+    )
+      return;
     const newTrip = {
       id: `t${Date.now()}`,
       origin: formData.origin,
       destination: formData.destination,
       distance: formData.distance || "N/A",
-      travelTime: formData.travelTime || "N/A",
+      // travelTime: formData.travelTime || "N/A",
       fare: parseFloat(formData.fare),
       departureDate: formData.departureDate,
       departureTime: formData.departureTime,
       seatsOccupied: [],
       totalSeats: 50,
-      busName: formData.busName,
+      bus_name: formData.bus_name,
     };
     addTrip(newTrip);
     setShowAddModal(false);
     setFormData(emptyForm);
     setRefresh((r) => r + 1);
     showNotif("Trip added successfully!", "success");
+  };
+
+  const handleAddTrip = async (e) => {
+    e.preventDefault();
+
+    const departureDateTime = `${formData.departureDate}T${formData.departureTime}:00`;
+
+    await supabase.from("trips").insert({
+      origin: formData.origin,
+      destination: formData.destination,
+      distance: formData.distance || "N/A",
+      fare: parseFloat(formData.fare),
+      departure_time: departureDateTime,
+      totalSeats: 50,
+      bus_name: formData.bus_name,
+    });
   };
 
   const handleUpdateTime = () => {
@@ -117,30 +161,51 @@ const AdminPage = () => {
           <p className="admin-card-bus">{trip.busName}</p>
           <div className="admin-card-meta">
             <div>
-              <div className="admin-card-meta-label"><Route /><span>Distance</span></div>
+              <div className="admin-card-meta-label">
+                <Route />
+                <span>Distance</span>
+              </div>
               <p className="admin-card-meta-value">{trip.distance}</p>
             </div>
             <div>
-              <div className="admin-card-meta-label"><Clock /><span>Duration</span></div>
+              <div className="admin-card-meta-label">
+                <Clock />
+                <span>Duration</span>
+              </div>
               <p className="admin-card-meta-value">{trip.travelTime}</p>
             </div>
             <div style={{ textAlign: "right" }}>
-              <span className="admin-card-meta-label"><span>Fare</span></span>
+              <span className="admin-card-meta-label">
+                <span>Fare</span>
+              </span>
               <p className="admin-card-fare">₱{trip.fare}</p>
             </div>
           </div>
           <div className="admin-card-footer">
             <div className="admin-card-footer-left">
-              <strong>{trip.departureDate}</strong>{" · "}{trip.departureTime}
+              <strong>{trip.departureDate}</strong>
+              {" · "}
+              {trip.departureTime}
             </div>
             <div className="admin-card-footer-right">
-              <span className="admin-card-booking-count">{bookingCount} booking{bookingCount !== 1 ? "s" : ""}</span>
+              <span className="admin-card-booking-count">
+                {bookingCount} booking{bookingCount !== 1 ? "s" : ""}
+              </span>
               {!isPast && (
-                <div style={{ display: "flex", gap: "0.25rem" }} onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => openEditModal(trip)} className="admin-card-action-btn admin-card-action-btn--edit">
+                <div
+                  style={{ display: "flex", gap: "0.25rem" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => openEditModal(trip)}
+                    className="admin-card-action-btn admin-card-action-btn--edit"
+                  >
                     <Edit3 />
                   </button>
-                  <button onClick={() => handleCancelTrip(trip)} className="admin-card-action-btn admin-card-action-btn--delete">
+                  <button
+                    onClick={() => handleCancelTrip(trip)}
+                    className="admin-card-action-btn admin-card-action-btn--delete"
+                  >
                     <Trash2 />
                   </button>
                 </div>
@@ -159,18 +224,31 @@ const AdminPage = () => {
       <div className="admin-page">
         <Navbar />
         <div className="pt-28 pb-20 container mx-auto px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "2.5rem" }}>
-            <button onClick={() => setSelectedTrip(null)} className="admin-detail-back">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <button
+              onClick={() => setSelectedTrip(null)}
+              className="admin-detail-back"
+            >
               <ArrowRight style={{ transform: "rotate(180deg)" }} />
               Back to Trips
             </button>
             <span className="admin-detail-label">Trip Details</span>
-            <h1 className="admin-detail-title">{selectedTrip.origin} → {selectedTrip.destination}</h1>
+            <h1 className="admin-detail-title">
+              {selectedTrip.origin} → {selectedTrip.destination}
+            </h1>
             <p className="admin-detail-bus">{selectedTrip.busName}</p>
           </motion.div>
 
           <div className="admin-detail-grid">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               <div className="admin-detail-card">
                 <h2>Seat Layout</h2>
                 <SeatSelector
@@ -182,33 +260,82 @@ const AdminPage = () => {
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.5rem",
+              }}
+            >
               <div className="admin-detail-card">
                 <h3>Trip Information</h3>
                 <div className="admin-info-grid">
                   <div className="admin-info-item">
                     <MapPin style={{ color: "hsl(0 89% 41%)" }} />
-                    <div><p className="admin-info-label">Origin</p><p className="admin-info-value">{selectedTrip.origin}</p></div>
+                    <div>
+                      <p className="admin-info-label">Origin</p>
+                      <p className="admin-info-value">{selectedTrip.origin}</p>
+                    </div>
                   </div>
                   <div className="admin-info-item">
                     <MapPin style={{ color: "hsl(24 100% 50%)" }} />
-                    <div><p className="admin-info-label">Destination</p><p className="admin-info-value">{selectedTrip.destination}</p></div>
+                    <div>
+                      <p className="admin-info-label">Destination</p>
+                      <p className="admin-info-value">
+                        {selectedTrip.destination}
+                      </p>
+                    </div>
                   </div>
                   <div className="admin-info-item">
                     <Route style={{ color: "hsl(0 0% 40%)" }} />
-                    <div><p className="admin-info-label">Distance</p><p className="admin-info-value">{selectedTrip.distance}</p></div>
+                    <div>
+                      <p className="admin-info-label">Distance</p>
+                      <p className="admin-info-value">
+                        {selectedTrip.distance}
+                      </p>
+                    </div>
                   </div>
                   <div className="admin-info-item">
                     <Clock style={{ color: "hsl(0 0% 40%)" }} />
-                    <div><p className="admin-info-label">Departure</p><p className="admin-info-value">{selectedTrip.departureDate} · {selectedTrip.departureTime}</p></div>
+                    <div>
+                      <p className="admin-info-label">Departure</p>
+                      <p className="admin-info-value">
+                        {selectedTrip.departureDate} ·{" "}
+                        {selectedTrip.departureTime}
+                      </p>
+                    </div>
                   </div>
                   <div className="admin-info-item">
                     <Bus style={{ color: "hsl(0 0% 40%)" }} />
-                    <div><p className="admin-info-label">Bus Name</p><p className="admin-info-value">{selectedTrip.busName}</p></div>
+                    <div>
+                      <p className="admin-info-label">Bus Name</p>
+                      <p className="admin-info-value">{selectedTrip.busName}</p>
+                    </div>
                   </div>
                   <div className="admin-info-item">
-                    <span style={{ width: 16, height: 16, color: "hsl(0 0% 40%)", fontSize: "0.75rem", fontWeight: 700 }}>₱</span>
-                    <div><p className="admin-info-label">Fare</p><p className="admin-info-value" style={{ color: "hsl(0 89% 41%)" }}>₱{selectedTrip.fare}</p></div>
+                    <span
+                      style={{
+                        width: 16,
+                        height: 16,
+                        color: "hsl(0 0% 40%)",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      ₱
+                    </span>
+                    <div>
+                      <p className="admin-info-label">Fare</p>
+                      <p
+                        className="admin-info-value"
+                        style={{ color: "hsl(0 89% 41%)" }}
+                      >
+                        ₱{selectedTrip.fare}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -218,11 +345,17 @@ const AdminPage = () => {
                 <div className="admin-availability">
                   <div className="admin-availability-row">
                     <span>Occupied</span>
-                    <span>{selectedTrip.seatsOccupied.length} / {selectedTrip.totalSeats}</span>
+                    <span>
+                      {selectedTrip.seatsOccupied.length} /{" "}
+                      {selectedTrip.totalSeats}
+                    </span>
                   </div>
                   <div className="admin-availability-row">
                     <span>Available</span>
-                    <span>{selectedTrip.totalSeats - selectedTrip.seatsOccupied.length}</span>
+                    <span>
+                      {selectedTrip.totalSeats -
+                        selectedTrip.seatsOccupied.length}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -235,9 +368,16 @@ const AdminPage = () => {
                       <div key={b.id} className="admin-booking-item">
                         <div>
                           <p className="admin-booking-item-id">{b.id}</p>
-                          <p className="admin-booking-item-pax">{b.passengers.length} passenger{b.passengers.length > 1 ? "s" : ""}</p>
+                          <p className="admin-booking-item-pax">
+                            {b.passengers.length} passenger
+                            {b.passengers.length > 1 ? "s" : ""}
+                          </p>
                         </div>
-                        <span className={`admin-booking-status admin-booking-status--${b.status.toLowerCase()}`}>{b.status}</span>
+                        <span
+                          className={`admin-booking-status admin-booking-status--${b.status.toLowerCase()}`}
+                        >
+                          {b.status}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -263,19 +403,33 @@ const AdminPage = () => {
             exit={{ opacity: 0, y: -20 }}
             className={`admin-notification admin-notification--${notification.type}`}
           >
-            {notification.type === "success" ? <CheckCircle /> : <AlertCircle />}
+            {notification.type === "success" ? (
+              <CheckCircle />
+            ) : (
+              <AlertCircle />
+            )}
             <span>{notification.msg}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
       <div className="pt-28 pb-20 container mx-auto px-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="admin-header">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="admin-header"
+        >
           <div>
             <span className="admin-header-label">Admin Panel</span>
             <h1>Trips Management</h1>
           </div>
-          <button onClick={() => { setFormData(emptyForm); setShowAddModal(true); }} className="admin-add-btn">
+          <button
+            onClick={() => {
+              setFormData(emptyForm);
+              setShowAddModal(true);
+            }}
+            className="admin-add-btn"
+          >
             <Plus />
             Add Trip
           </button>
@@ -298,7 +452,13 @@ const AdminPage = () => {
 
         <AnimatePresence mode="wait">
           {activeTab === "ongoing" ? (
-            <motion.div key="ongoing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              key="ongoing"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
               {upcomingTrips.length > 0 ? (
                 <div className="admin-trips-grid">
                   {upcomingTrips.map((trip) => (
@@ -310,7 +470,13 @@ const AdminPage = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div key="completed" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              key="completed"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
               {pastTrips.length > 0 ? (
                 <div className="admin-trips-grid">
                   {pastTrips.map((trip) => (
@@ -329,7 +495,9 @@ const AdminPage = () => {
       <AnimatePresence>
         {showAddModal && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="admin-modal-overlay"
             onClick={() => setShowAddModal(false)}
           >
@@ -342,15 +510,36 @@ const AdminPage = () => {
             >
               <div className="admin-modal-header">
                 <h3>Add New Trip</h3>
-                <button onClick={() => setShowAddModal(false)} className="admin-modal-close"><X /></button>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="admin-modal-close"
+                >
+                  <X />
+                </button>
               </div>
               <div>
                 {[
-                  { label: "Origin *", key: "origin", placeholder: "e.g. Manila" },
-                  { label: "Destination *", key: "destination", placeholder: "e.g. Baguio" },
-                  { label: "Distance", key: "distance", placeholder: "e.g. 246 km" },
-                  { label: "Travel Time", key: "travelTime", placeholder: "e.g. 5h 30m" },
-                  { label: "Bus Name *", key: "busName", placeholder: "e.g. BusLink Express" },
+                  {
+                    label: "Origin *",
+                    key: "origin",
+                    placeholder: "e.g. Manila",
+                  },
+                  {
+                    label: "Destination *",
+                    key: "destination",
+                    placeholder: "e.g. Baguio",
+                  },
+                  {
+                    label: "Distance",
+                    key: "distance",
+                    placeholder: "e.g. 246 km",
+                  },
+                  // { label: "Travel Time", key: "travelTime", placeholder: "e.g. 5h 30m" },
+                  {
+                    label: "Bus Name *",
+                    key: "bus_name",
+                    placeholder: "e.g. BusLink Express",
+                  },
                   { label: "Fare *", key: "fare", placeholder: "e.g. 750" },
                 ].map((field) => (
                   <div key={field.key} className="admin-form-group">
@@ -359,7 +548,12 @@ const AdminPage = () => {
                       type={field.key === "fare" ? "number" : "text"}
                       placeholder={field.placeholder}
                       value={formData[field.key]}
-                      onChange={(e) => setFormData((p) => ({ ...p, [field.key]: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((p) => ({
+                          ...p,
+                          [field.key]: e.target.value,
+                        }))
+                      }
                       className="admin-form-input"
                     />
                   </div>
@@ -370,7 +564,12 @@ const AdminPage = () => {
                     <input
                       type="date"
                       value={formData.departureDate}
-                      onChange={(e) => setFormData((p) => ({ ...p, departureDate: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((p) => ({
+                          ...p,
+                          departureDate: e.target.value,
+                        }))
+                      }
                       className="admin-form-input"
                     />
                   </div>
@@ -380,14 +579,24 @@ const AdminPage = () => {
                       type="text"
                       placeholder="e.g. 06:00 AM"
                       value={formData.departureTime}
-                      onChange={(e) => setFormData((p) => ({ ...p, departureTime: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((p) => ({
+                          ...p,
+                          departureTime: e.target.value,
+                        }))
+                      }
                       className="admin-form-input"
                     />
                   </div>
                 </div>
               </div>
               <div className="admin-modal-actions">
-                <button onClick={() => setShowAddModal(false)} className="admin-modal-cancel">Cancel</button>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="admin-modal-cancel"
+                >
+                  Cancel
+                </button>
                 <button onClick={handleAddTrip} className="admin-modal-submit">
                   <Plus />
                   Add Trip
@@ -402,9 +611,14 @@ const AdminPage = () => {
       <AnimatePresence>
         {showEditModal && selectedTrip && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="admin-modal-overlay"
-            onClick={() => { setShowEditModal(false); setSelectedTrip(null); }}
+            onClick={() => {
+              setShowEditModal(false);
+              setSelectedTrip(null);
+            }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -415,10 +629,19 @@ const AdminPage = () => {
             >
               <div className="admin-modal-header">
                 <h3>Update Departure Time</h3>
-                <button onClick={() => { setShowEditModal(false); setSelectedTrip(null); }} className="admin-modal-close"><X /></button>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedTrip(null);
+                  }}
+                  className="admin-modal-close"
+                >
+                  <X />
+                </button>
               </div>
               <p className="admin-modal-trip-info">
-                {selectedTrip.origin} → {selectedTrip.destination} · {selectedTrip.departureDate}
+                {selectedTrip.origin} → {selectedTrip.destination} ·{" "}
+                {selectedTrip.departureDate}
               </p>
               <div className="admin-form-group">
                 <label className="admin-form-label">New Departure Time</label>
@@ -431,8 +654,19 @@ const AdminPage = () => {
                 />
               </div>
               <div className="admin-modal-actions">
-                <button onClick={() => { setShowEditModal(false); setSelectedTrip(null); }} className="admin-modal-cancel">Cancel</button>
-                <button onClick={handleUpdateTime} className="admin-modal-submit">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedTrip(null);
+                  }}
+                  className="admin-modal-cancel"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateTime}
+                  className="admin-modal-submit"
+                >
                   <CheckCircle />
                   Update
                 </button>

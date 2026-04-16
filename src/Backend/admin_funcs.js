@@ -8,6 +8,8 @@ export async function createTrip(data) {
       destination: data.destination,
       fare: data.fare,
       distance: data.distance,
+      departure_time: data.departure_time,
+      bus_name: data.bus_name
     })
     .select()
     .single();
@@ -29,7 +31,7 @@ export async function createTripSeats(trip_id) {
     seat_owner: null,
   }));
 
-  const { error } = await supabase.from("seats_tbl").insert(seats);
+  const { error } = await supabase.from("seats").insert(seats);
 
   if (error) {
     console.log("error moy ay: ", error);
