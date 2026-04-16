@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: hsl(var(--foreground) / 0.4);
+  background: var(--foreground) / 0.4;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -31,28 +31,28 @@
 }
 
 .confirmation-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   font-size: 1.25rem;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .confirmation-close-btn {
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
-  background: hsl(var(--muted));
+  background: var(--muted);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .confirmation-close-btn:hover {
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .confirmation-body {
@@ -63,33 +63,33 @@
 }
 
 .confirmation-route-box {
-  background: hsl(var(--muted) / 0.5);
+  background: var(--muted) / 0.5;
   border-radius: 1rem;
   padding: 1rem;
 }
 
 .confirmation-route-label {
   font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   margin-bottom: 0.25rem;
 }
 
 .confirmation-route-value {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .confirmation-route-date {
   font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   margin-top: 0.25rem;
 }
 
 .confirmation-pax-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .confirmation-pax-list {
@@ -102,7 +102,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: hsl(var(--muted) / 0.3);
+  background: var(--muted) / 0.3;
   border-radius: 0.75rem;
   padding: 0.75rem;
 }
@@ -110,18 +110,18 @@
 .confirmation-pax-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .confirmation-pax-detail {
   font-size: 0.75rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .confirmation-pax-fare {
   font-size: 0.875rem;
   font-weight: 700;
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 
 .confirmation-total {
@@ -129,20 +129,20 @@
   align-items: center;
   justify-content: space-between;
   padding-top: 1rem;
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid var(--border);
 }
 
 .confirmation-total-label {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .confirmation-total-value {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   font-size: 1.5rem;
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 
 .confirmation-actions {
@@ -154,17 +154,17 @@
   flex: 1;
   padding: 0.75rem;
   border-radius: 1rem;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border);
   background: none;
   font-size: 0.875rem;
   font-weight: 600;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .confirmation-cancel-btn:hover {
-  background: hsl(var(--muted));
+  background: var(--muted);
 }
 
 .confirmation-confirm-btn {
@@ -172,8 +172,8 @@
   padding: 0.75rem;
   border-radius: 1rem;
   border: none;
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-  color: hsl(var(--primary-foreground));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: var(--primary-foreground);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;

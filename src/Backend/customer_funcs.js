@@ -34,6 +34,7 @@ export async function getTrips() {
       fare,
       distance,
       departure_time,
+      bus_name,
       origin:city!trips_origin_fkey (city_name),
       destination:city!trips_destination_fkey (city_name)
     `);
@@ -141,6 +142,7 @@ export async function getTripById(trip_id) {
       id,
       fare,
       distance,
+      bus_name,
       departure_time,
       origin:city!trips_origin_fkey (city_name),
       destination:city!trips_destination_fkey (city_name),
@@ -157,6 +159,28 @@ export async function getTripById(trip_id) {
     console.log("error moy ay: ", error);
     return null;
   }
-  console.log("data is: ", data);
-  return data;
+
+  const formattedData = {
+    ...data,
+    departure_time: formatDateTime(data.departure_time),
+  };
+  console.log("data is: ", formattedData);
+  return formattedData;
+}
+
+function parseTimestamp(ts) {
+  return new Date(ts.replace(" ", "T"));
+}
+
+function formatDateTime(ts) {
+  const date = parseTimestamp(ts);
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila", // important for PH apps
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }

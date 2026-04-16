@@ -39,11 +39,9 @@ const ConfirmationModal = ({
               <div className="confirmation-route-box">
                 <p className="confirmation-route-label">Route</p>
                 <p className="confirmation-route-value">
-                  {trip.origin} → {trip.destination}
+                  {trip.origin.city_name} → {trip.destination.city_name}
                 </p>
-                <p className="confirmation-route-date">
-                  {trip.departureDate} · {trip.departureTime}
-                </p>
+                <p className="confirmation-route-date">{trip.departure_time}</p>
               </div>
 
               <div className="confirmation-pax-list">

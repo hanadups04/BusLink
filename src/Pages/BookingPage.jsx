@@ -43,6 +43,13 @@ const BookingPage = () => {
       isMounted = false;
     };
   }, []);
+
+  const occupiedSeats =
+    tripData.seats
+      ?.map((seat, index) => (seat.taken ? index + 1 : null))
+      .filter((seatNo) => seatNo !== null) ?? [];
+
+  const occupiedSeatsCount = occupiedSeats.length;
   // const trip = getTripById(tripId || "");
 
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -74,6 +81,7 @@ const BookingPage = () => {
   }
 
   const handleSeatToggle = (seat) => {
+    console.log("sleected seat", seat);
     if (selectedSeats.includes(seat)) {
       setSelectedSeats((prev) => prev.filter((s) => s !== seat));
       setPassengers((prev) =>
@@ -118,7 +126,7 @@ const BookingPage = () => {
   };
 
   const calculateFare = (type) => {
-    const base = trip.fare;
+    const base = tripData.fare;
     return ["Student", "Senior", "PWD"].includes(type)
       ? Math.round(base * 0.8)
       : base;
@@ -145,15 +153,15 @@ const BookingPage = () => {
   const handleConfirm = () => {
     const booking = {
       id: `BK${Date.now()}`,
-      tripId: trip.id,
-      trip: { ...trip },
+      tripId: id,
+      trip: tripData,
       passengers: finalPassengers,
       totalFare,
       paymentMethod: "GCash",
       status: "Booked",
       bookedAt: new Date().toISOString(),
     };
-    addBooking(booking);
+    // addBooking(booking);
     setCompletedBooking(booking);
     setShowModal(false);
     setBookingComplete(true);
@@ -235,10 +243,10 @@ const BookingPage = () => {
                     Select Your Seats
                   </h2>
                   <SeatSelector
-                  // totalSeats={tripData}
-                  // occupiedSeats={trip.seatsOccupied}
-                  // selectedSeats={selectedSeats}
-                  // onSeatToggle={handleSeatToggle}
+                    totalSeats={tripData.seats.length}
+                    occupiedSeats={occupiedSeats}
+                    selectedSeats={selectedSeats}
+                    onSeatToggle={handleSeatToggle}
                   />
                 </div>
                 <div
@@ -260,11 +268,10 @@ const BookingPage = () => {
                       {tripData.destination.city_name}
                     </p>
                     <p>
-                      <strong>Distance:</strong> {tripData.distance}
+                      <strong>Distance:</strong> {tripData.distance} KM
                     </p>
                     <p>
-                      <strong>Departure:</strong> {tripData.departure_time} ·{" "}
-                      {tripData.departure_time}
+                      <strong>Departure:</strong> {tripData.departure_time}
                     </p>
                   </div>
                   <div className="glass-card">
