@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
@@ -9,10 +9,40 @@ import ConfirmationModal from "../Components/ConfirmationModal";
 import Receipt from "../Components/Receipt";
 // import { getTripById, addBooking } from "../Backend/tripsData";
 import "./BookingPage.css";
+import * as Read from "../Backend/customer_funcs";
 
 const BookingPage = () => {
-  const { tripId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [tripData, setTripData] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    console.log("trip id", id);
+    let isMounted = true;
+
+    async function getData() {
+      try {
+        if (isMounted) {
+          const data = await Read.getTripById(id);
+          setTripData(data ?? []);
+          console.log("booking data", data);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    getData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   // const trip = getTripById(tripId || "");
 
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -23,25 +53,25 @@ const BookingPage = () => {
   const [bookingComplete, setBookingComplete] = useState(false);
   const [completedBooking, setCompletedBooking] = useState(null);
 
-  // if (!trip) {
-  return (
-    <div
-      className="booking-page"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ textAlign: "center" }}>
-        <h2>Trip not found</h2>
-        <button onClick={() => navigate("/")} className="book-btn active">
-          Go Home
-        </button>
+  if (!id) {
+    return (
+      <div
+        className="booking-page"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <h2>Trip not found</h2>
+          <button onClick={() => navigate("/")} className="book-btn active">
+            Go Home
+          </button>
+        </div>
       </div>
-    </div>
-  );
-  // }
+    );
+  }
 
   const handleSeatToggle = (seat) => {
     if (selectedSeats.includes(seat)) {
@@ -179,206 +209,222 @@ const BookingPage = () => {
     <div className="booking-page">
       <Navbar />
       <div className="pt-28 pb-20 container mx-auto px-6">
-        <div className="booking-header mb-10">
-          <span className="label">Book Your Ride</span>
-          <h1>
-            {trip.origin} → {trip.destination}
-          </h1>
-        </div>
-        <div className="booking-layout">
-          <div className="glass-card">
-            <h2
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
-                fontSize: "1.25rem",
-                marginBottom: "1.5rem",
-              }}
-            >
-              Select Your Seats
-            </h2>
-            <SeatSelector
-              totalSeats={trip.totalSeats}
-              occupiedSeats={trip.seatsOccupied}
-              selectedSeats={selectedSeats}
-              onSeatToggle={handleSeatToggle}
-            />
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
-          >
-            <div className="glass-card">
-              <h3 style={{ fontWeight: 700, marginBottom: "1rem" }}>
-                Trip Information
-              </h3>
-              <p>
-                <strong>Origin:</strong> {trip.origin}
-              </p>
-              <p>
-                <strong>Destination:</strong> {trip.destination}
-              </p>
-              <p>
-                <strong>Distance:</strong> {trip.distance}
-              </p>
-              <p>
-                <strong>Departure:</strong> {trip.departureDate} ·{" "}
-                {trip.departureTime}
-              </p>
+        <>
+          {loading ? (
+            <div className="empty-state">
+              <p>Loading trip...</p>
             </div>
-            <div className="glass-card">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 style={{ fontWeight: 700 }}>Passenger Details</h3>
-                <button
-                  onClick={addPassenger}
+          ) : (
+            <>
+              <div className="booking-header mb-10">
+                <span className="label">Book Your Ride</span>
+                <h1>
+                  {tripData.origin.city_name} → {tripData.destination.city_name}
+                </h1>
+              </div>
+              <div className="booking-layout">
+                <div className="glass-card">
+                  <h2
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700,
+                      fontSize: "1.25rem",
+                      marginBottom: "1.5rem",
+                    }}
+                  >
+                    Select Your Seats
+                  </h2>
+                  <SeatSelector
+                  // totalSeats={tripData}
+                  // occupiedSeats={trip.seatsOccupied}
+                  // selectedSeats={selectedSeats}
+                  // onSeatToggle={handleSeatToggle}
+                  />
+                </div>
+                <div
                   style={{
-                    color: "hsl(0 89% 41%)",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1.5rem",
                   }}
                 >
-                  + Add Passenger
-                </button>
-              </div>
-              <AnimatePresence mode="popLayout">
-                {passengers.map((p, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="passenger-card"
-                  >
+                  <div className="glass-card">
+                    <h3 style={{ fontWeight: 700, marginBottom: "1rem" }}>
+                      Trip Information
+                    </h3>
+                    <p>
+                      <strong>Origin:</strong> {tripData.origin.city_name}
+                    </p>
+                    <p>
+                      <strong>Destination:</strong>{" "}
+                      {tripData.destination.city_name}
+                    </p>
+                    <p>
+                      <strong>Distance:</strong> {tripData.distance}
+                    </p>
+                    <p>
+                      <strong>Departure:</strong> {tripData.departure_time} ·{" "}
+                      {tripData.departure_time}
+                    </p>
+                  </div>
+                  <div className="glass-card">
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        marginBottom: "0.75rem",
+                        alignItems: "center",
+                        marginBottom: "1rem",
                       }}
                     >
-                      <span
+                      <h3 style={{ fontWeight: 700 }}>Passenger Details</h3>
+                      <button
+                        onClick={addPassenger}
                         style={{
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          color: "hsl(0 0% 40%)",
+                          color: "hsl(0 89% 41%)",
+                          fontWeight: 600,
+                          fontSize: "0.875rem",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
                         }}
                       >
-                        Passenger {i + 1}
-                      </span>
-                      {passengers.length > 1 && (
-                        <button
-                          onClick={() => removePassenger(i)}
-                          style={{
-                            color: "hsl(0 84% 60%)",
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                          }}
-                        >
-                          ✕
-                        </button>
-                      )}
+                        + Add Passenger
+                      </button>
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Passenger Name *"
-                      value={p.name}
-                      onChange={(e) =>
-                        updatePassenger(i, "name", e.target.value)
-                      }
-                      required
-                    />
+                    <AnimatePresence mode="popLayout">
+                      {passengers.map((p, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="passenger-card"
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginBottom: "0.75rem",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                color: "hsl(0 0% 40%)",
+                              }}
+                            >
+                              Passenger {i + 1}
+                            </span>
+                            {passengers.length > 1 && (
+                              <button
+                                onClick={() => removePassenger(i)}
+                                style={{
+                                  color: "hsl(0 84% 60%)",
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Passenger Name *"
+                            value={p.name}
+                            onChange={(e) =>
+                              updatePassenger(i, "name", e.target.value)
+                            }
+                            required
+                          />
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "0.75rem",
+                              marginTop: "0.75rem",
+                            }}
+                          >
+                            <div
+                              style={{
+                                padding: "0.75rem 1rem",
+                                borderRadius: "0.75rem",
+                                border: "1px solid hsl(0 0% 90%)",
+                                fontSize: "0.875rem",
+                              }}
+                            >
+                              Seat:{" "}
+                              {p.seatNumber ? `#${p.seatNumber}` : "Select"}
+                            </div>
+                            <select
+                              value={p.type}
+                              onChange={(e) =>
+                                updatePassenger(i, "type", e.target.value)
+                              }
+                            >
+                              <option value="Regular">Regular</option>
+                              <option value="Student">Student</option>
+                              <option value="Senior">Senior</option>
+                              <option value="PWD">PWD</option>
+                            </select>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                  <div className="glass-card">
+                    <h3 style={{ fontWeight: 700, marginBottom: "1rem" }}>
+                      Payment Details
+                    </h3>
+                    <p style={{ fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                      <strong>Payment:</strong> GCash
+                    </p>
+                    <p style={{ fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                      <strong>Base Rate:</strong> ₱{tripData.fare}
+                    </p>
                     <div
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "0.75rem",
+                        borderTop: "1px solid hsl(0 0% 90%)",
+                        paddingTop: "0.75rem",
                         marginTop: "0.75rem",
+                        display: "flex",
+                        justifyContent: "space-between",
                       }}
                     >
-                      <div
+                      <strong>Total Fee</strong>
+                      <span
                         style={{
-                          padding: "0.75rem 1rem",
-                          borderRadius: "0.75rem",
-                          border: "1px solid hsl(0 0% 90%)",
-                          fontSize: "0.875rem",
+                          fontSize: "1.5rem",
+                          fontWeight: 700,
+                          color: "hsl(0 89% 41%)",
                         }}
                       >
-                        Seat: {p.seatNumber ? `#${p.seatNumber}` : "Select"}
-                      </div>
-                      <select
-                        value={p.type}
-                        onChange={(e) =>
-                          updatePassenger(i, "type", e.target.value)
-                        }
-                      >
-                        <option value="Regular">Regular</option>
-                        <option value="Student">Student</option>
-                        <option value="Senior">Senior</option>
-                        <option value="PWD">PWD</option>
-                      </select>
+                        ₱{totalFare.toLocaleString()}
+                      </span>
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-            <div className="glass-card">
-              <h3 style={{ fontWeight: 700, marginBottom: "1rem" }}>
-                Payment Details
-              </h3>
-              <p style={{ fontSize: "0.875rem", marginBottom: "0.5rem" }}>
-                <strong>Payment:</strong> GCash
-              </p>
-              <p style={{ fontSize: "0.875rem", marginBottom: "0.5rem" }}>
-                <strong>Base Rate:</strong> ₱{trip.fare}
-              </p>
-              <div
-                style={{
-                  borderTop: "1px solid hsl(0 0% 90%)",
-                  paddingTop: "0.75rem",
-                  marginTop: "0.75rem",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <strong>Total Fee</strong>
-                <span
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: 700,
-                    color: "hsl(0 89% 41%)",
-                  }}
-                >
-                  ₱{totalFare.toLocaleString()}
-                </span>
+                    <button
+                      onClick={handleBookNow}
+                      disabled={!canBook}
+                      className={`book-btn ${canBook ? "active" : "disabled"}`}
+                      style={{ marginTop: "1.5rem" }}
+                    >
+                      → Book Now
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={handleBookNow}
-                disabled={!canBook}
-                className={`book-btn ${canBook ? "active" : "disabled"}`}
-                style={{ marginTop: "1.5rem" }}
-              >
-                → Book Now
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          )}
+        </>
       </div>
       <ConfirmationModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={handleConfirm}
-        trip={trip}
+        trip={tripData}
         passengers={finalPassengers}
         totalFare={totalFare}
       />

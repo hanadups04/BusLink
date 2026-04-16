@@ -16,7 +16,7 @@
 
 .trip-card:hover .trip-card-inner {
   box-shadow: 0 12px 40px hsl(0 0% 0% / 0.12);
-  border-color: hsl(var(--primary) / 0.2);
+  border-color: var(--primary) / 0.2;
   transform: translateY(-6px) scale(1.02);
 }
 
@@ -32,9 +32,9 @@
 }
 
 .trip-card-status--booked {
-  background: hsl(var(--secondary) / 0.1);
-  color: hsl(var(--secondary));
-  border-color: hsl(var(--secondary) / 0.2);
+  background: var(--secondary) / 0.1;
+  color: var(--secondary);
+  border-color: var(--secondary) / 0.2;
 }
 
 .trip-card-status--done {
@@ -44,9 +44,9 @@
 }
 
 .trip-card-status--cancelled {
-  background: hsl(var(--destructive) / 0.1);
-  color: hsl(var(--destructive));
-  border-color: hsl(var(--destructive) / 0.2);
+  background: var(--destructive) / 0.1;
+  color: var(--destructive);
+  border-color: var(--destructive) / 0.2;
 }
 
 .trip-card-route {
@@ -60,12 +60,12 @@
   width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: hsl(var(--primary-foreground));
+  color: var(--primary-foreground);
 }
 
 .trip-card-route-names {
@@ -77,10 +77,10 @@
 }
 
 .trip-card-route-name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   font-size: 1.125rem;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -89,14 +89,14 @@
 .trip-card-route-arrow {
   width: 1rem;
   height: 1rem;
-  color: hsl(var(--primary));
+  color: var(--primary);
   flex-shrink: 0;
 }
 
 .trip-card-bus-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   margin-left: 2.75rem;
   margin-bottom: 1.25rem;
 }
@@ -118,7 +118,7 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .trip-card-meta-label span {
@@ -136,7 +136,7 @@
 .trip-card-meta-value {
   font-size: 0.875rem;
   font-weight: 600;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .trip-card-meta-fare {
@@ -145,9 +145,9 @@
 
 .trip-card-fare-value {
   font-size: 1.125rem;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 
 .trip-card-departure {
@@ -157,15 +157,15 @@
   padding-top: 1rem;
   border-top: 1px solid hsl(0 0% 0% / 0.06);
   font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .trip-card-departure-date {
   font-weight: 500;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .trip-card-seats-left {
   font-size: 0.75rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }

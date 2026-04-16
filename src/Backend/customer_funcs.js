@@ -28,6 +28,24 @@ export async function loginUser(email, password) {
   return data;
 }
 
+export async function getTrips() {
+  const { data, error } = await supabase.from("trips").select(`
+      id,
+      fare,
+      distance,
+      departure_time,
+      origin:city!trips_origin_fkey (city_name),
+      destination:city!trips_destination_fkey (city_name)
+    `);
+
+  if (error) {
+    console.log("error moy ay: ", error);
+    return [];
+  }
+  console.log("trip datas: ", data);
+  return data;
+}
+
 export async function createPayment(data) {
   const { error } = await supabase.from("payments_tbl").insert({
     trip_id: data.trip_id,
@@ -54,22 +72,29 @@ export async function createBooking(data) {
   }
 }
 
-export async function getTrips() {
-  const { data, error } = await supabase.from("trips").select(`
-      id,
-      fare,
-      distance,
-      departure_time,
-      origin:city!trips_origin_fkey (city_name),
-      destination:city!trips_destination_fkey (city_name)
-    `);
+export async function takeSeat({ seat_id, user_id }) {
+  const { data, error } = await supabase
+    .from("seats_tbl")
+    .update({
+      taken: true,
+      taken_at: new Date().toISOString(),
+      seat_owner: user_id,
+    })
+    .eq("id", seat_id)
+    .eq("taken", false)
+    .select();
 
   if (error) {
     console.log("error moy ay: ", error);
-    return [];
+    return null;
   }
-  console.log("trip datas: ", data);
-  return data;
+
+  if (!data || data.length === 0) {
+    console.log("Seat already taken");
+    return null;
+  }
+
+  return data[0];
 }
 
 export async function getUserBookings(user_id) {
@@ -108,47 +133,20 @@ export async function getUserBookings(user_id) {
   return data;
 }
 
-export async function takeSeat({ seat_id, user_id }) {
-  const { data, error } = await supabase
-    .from("seats_tbl")
-    .update({
-      taken: true,
-      taken_at: new Date().toISOString(),
-      seat_owner: user_id,
-    })
-    .eq("id", seat_id)
-    .eq("taken", false)
-    .select();
-
-  if (error) {
-    console.log("error moy ay: ", error);
-    return null;
-  }
-
-  if (!data || data.length === 0) {
-    console.log("Seat already taken");
-    return null;
-  }
-
-  return data[0];
-}
-
 export async function getTripById(trip_id) {
   const { data, error } = await supabase
-    .from("trips_tbl")
+    .from("trips")
     .select(
       `
       id,
       fare,
       distance,
-      origin:cities_tbl!trips_tbl_origin_fkey (id, name),
-      destination:cities_tbl!trips_tbl_destination_fkey (id, name),
-      seats:seats_tbl (
+      departure_time,
+      origin:city!trips_origin_fkey (city_name),
+      destination:city!trips_destination_fkey (city_name),
+      seats:seats (
         id,
-        taken,
-        paid,
-        seat_owner,
-        taken_at
+        taken
       )
     `,
     )
@@ -159,6 +157,6 @@ export async function getTripById(trip_id) {
     console.log("error moy ay: ", error);
     return null;
   }
-
+  console.log("data is: ", data);
   return data;
 }
