@@ -35,9 +35,13 @@ const TripCard = ({ trip, index = 0, status, onClick }) => {
             <MapPin style={{ width: 16, height: 16 }} />
           </div>
           <div className="trip-card-route-names">
-            <span className="trip-card-route-name">{trip.origin}</span>
+            <span className="trip-card-route-name">
+              {trip.origin.city_name}
+            </span>
             <ArrowRight className="trip-card-route-arrow" />
-            <span className="trip-card-route-name">{trip.destination}</span>
+            <span className="trip-card-route-name">
+              {trip.destination.city_name}
+            </span>
           </div>
         </div>
 
@@ -51,13 +55,6 @@ const TripCard = ({ trip, index = 0, status, onClick }) => {
             </div>
             <p className="trip-card-meta-value">{trip.distance}</p>
           </div>
-          <div className="trip-card-meta-item">
-            <div className="trip-card-meta-label">
-              <Clock />
-              <span>Duration</span>
-            </div>
-            <p className="trip-card-meta-value">{trip.travelTime}</p>
-          </div>
           <div className="trip-card-meta-item trip-card-meta-fare">
             <span className="trip-card-meta-label">
               <span>Fare</span>
@@ -66,7 +63,7 @@ const TripCard = ({ trip, index = 0, status, onClick }) => {
           </div>
         </div>
 
-        <div className="trip-card-departure">
+        {/* <div className="trip-card-departure"> 
           <div>
             <span className="trip-card-departure-date">
               {trip.departureDate}
@@ -77,7 +74,7 @@ const TripCard = ({ trip, index = 0, status, onClick }) => {
           <div className="trip-card-seats-left">
             {trip.totalSeats - trip.seatsOccupied.length} seats left
           </div>
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );

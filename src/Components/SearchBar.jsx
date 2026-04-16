@@ -15,7 +15,7 @@ const SearchBar = ({ onSearch }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch(origin, destination, date, pax);
+    onSearch(origin, destination);
   };
 
   return (
