@@ -14,7 +14,7 @@ export async function createUser(data) {
 
 export async function loginUser(email, password) {
   const { data: userdata, error } = await supabase
-    .from("users_tbl")
+    .from("users")
     .select("*")
     .eq("email", email)
     .eq("password", password)
@@ -25,7 +25,8 @@ export async function loginUser(email, password) {
     return null;
   }
 
-  return data;
+  console.log("userdata: ", userdata);
+  return userdata;
 }
 
 export async function getTrips() {
@@ -75,7 +76,7 @@ export async function createBooking(data) {
 
 export async function takeSeat({ seat_id, user_id }) {
   const { data, error } = await supabase
-    .from("seats_tbl")
+    .from("seats")
     .update({
       taken: true,
       taken_at: new Date().toISOString(),
@@ -84,18 +85,15 @@ export async function takeSeat({ seat_id, user_id }) {
     .eq("id", seat_id)
     .eq("taken", false)
     .select();
+    
 
   if (error) {
     console.log("error moy ay: ", error);
-    return null;
+    return error;
   }
+  console.log("take seat", data);
+  return data;
 
-  if (!data || data.length === 0) {
-    console.log("Seat already taken");
-    return null;
-  }
-
-  return data[0];
 }
 
 export async function getUserBookings(user_id) {

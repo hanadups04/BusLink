@@ -132,14 +132,15 @@ const BookingPage = () => {
       : base;
   };
 
-  const finalPassengers = passengers
-    .filter((p) => p.name && p.seatNumber)
-    .map((p) => ({
-      name: p.name,
-      seatNumber: p.seatNumber,
-      type: p.type,
-      fare: calculateFare(p.type),
-    }));
+const finalPassengers = passengers
+  .filter((p) => p.name && p.seatNumber)
+  .map((p) => ({
+    name: p.name,
+    seatNumber: p.seatNumber,
+    seatId: tripData.seats?.[p.seatNumber - 1]?.id ?? null,
+    type: p.type,
+    fare: calculateFare(p.type),
+  }));
 
   const totalFare = finalPassengers.reduce((sum, p) => sum + p.fare, 0);
   const canBook =
@@ -150,7 +151,11 @@ const BookingPage = () => {
     if (canBook) setShowModal(true);
   };
 
-  const handleConfirm = () => {
+  const currentUser = JSON.parse(
+  localStorage.getItem("buslink_current_user") || "null",
+);
+
+  const handleConfirm = async () => {
     const booking = {
       id: `BK${Date.now()}`,
       tripId: id,
@@ -161,6 +166,23 @@ const BookingPage = () => {
       status: "Booked",
       bookedAt: new Date().toISOString(),
     };
+
+    console.log("passengers: ", finalPassengers, "current user: ", currentUser  );
+
+    const seatUpdates = await Promise.all(
+      finalPassengers.map((p) =>
+        Read.takeSeat({
+          seat_id: p.seatId,
+          user_id: currentUser, 
+        }),
+      ),
+    );
+
+    const allSeatsUpdated = seatUpdates.every(Boolean);
+    if(!allSeatsUpdated) {
+      console.log("Failed to book all seats. Please try again.");
+      return;
+    }
     // addBooking(booking);
     setCompletedBooking(booking);
     setShowModal(false);
