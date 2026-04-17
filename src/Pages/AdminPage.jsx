@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -16,6 +16,8 @@ import {
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import SeatSelector from "../Components/SeatSelector";
+import * as AdminFunction from "../Backend/admin_funcs"
+import * as CustomerFunction from "../Backend/customer_funcs"
 // import { getTrips, addTrip, updateTripDepartureTime, cancelTrip, getTripBookings } from "../Backend/tripsData";
 import "./AdminPage.css";
 
@@ -39,76 +41,113 @@ const AdminPage = () => {
   const [notification, setNotification] = useState(null);
   const [, setRefresh] = useState(0);
   const [activeTab, setActiveTab] = useState("ongoing");
-
-  const trips = getTrips();
+  const [originDesti, setOriginDesti] = useState([]);
+const [trips, setTrips] = useState([]);
+  
   const now = new Date();
 
-  const upcomingTrips = useMemo(() => {
-    return trips.filter(
-      (t) =>
-        new Date(`${t.departureDate}T00:00:00`) >=
-        new Date(now.toISOString().split("T")[0]),
-    );
-  }, [trips]);
+  // const upcomingTrips = useMemo(() => {
+  //   return trips.filter(
+  //     (t) =>
+  //       new Date(`${t.departureDate}T00:00:00`) >=
+  //       new Date(now.toISOString().split("T")[0]),
+  //   );
+  // }, [trips]);
 
-  const pastTrips = useMemo(() => {
-    return trips.filter(
-      (t) =>
-        new Date(`${t.departureDate}T00:00:00`) <
-        new Date(now.toISOString().split("T")[0]),
-    );
-  }, [trips]);
+  // const pastTrips = useMemo(() => {
+  //   return trips.filter(
+  //     (t) =>
+  //       new Date(`${t.departureDate}T00:00:00`) <
+  //       new Date(now.toISOString().split("T")[0]),
+  //   );
+  // }, [trips]);
 
   const showNotif = (msg, type) => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleAddTrip2 = () => {
+useEffect(() => {
+  let isMounted = true;
+
+  const getData = async () => {
+    try {
+      setLoading(true);
+
+      const [tripss, originDestination] = await Promise.all([
+        CustomerFunction.getTrips(),
+        AdminFunction.getOrigins(),
+      ]);
+
+      if (isMounted) {
+        setTrips(tripss);
+        setOriginDesti(originDestination);
+      }
+
+      console.log("trips: ", tripss);
+      console.log("originDestination: ", originDestination);
+
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+  };
+
+  getData();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
+
+  const handleAddTrip = async (e) => {
+    e.preventDefault();
     if (
       !formData.origin ||
       !formData.destination ||
       !formData.fare ||
       !formData.departureDate ||
       !formData.departureTime ||
-      !formData.busName
+      !formData.bus_name
     )
       return;
+
+      const departureDateTime = `${formData.departureDate}T${formData.departureTime}:00`;
+
     const newTrip = {
-      id: `t${Date.now()}`,
       origin: formData.origin,
       destination: formData.destination,
       distance: formData.distance || "N/A",
-      // travelTime: formData.travelTime || "N/A",
       fare: parseFloat(formData.fare),
-      departureDate: formData.departureDate,
-      departureTime: formData.departureTime,
-      seatsOccupied: [],
-      totalSeats: 50,
-      bus_name: formData.bus_name,
+      departure_time: departureDateTime,
+      bus_name: formData.bus_name
     };
-    addTrip(newTrip);
+    console.log("insert", newTrip);
+    AdminFunction.createTrip(newTrip);
     setShowAddModal(false);
     setFormData(emptyForm);
     setRefresh((r) => r + 1);
     showNotif("Trip added successfully!", "success");
   };
 
-  const handleAddTrip = async (e) => {
-    e.preventDefault();
+  // const handleAddTrip = async (e) => {
+  //   e.preventDefault();
 
-    const departureDateTime = `${formData.departureDate}T${formData.departureTime}:00`;
+  //   const departureDateTime = `${formData.departureDate}T${formData.departureTime}:00`;
 
-    await supabase.from("trips").insert({
-      origin: formData.origin,
-      destination: formData.destination,
-      distance: formData.distance || "N/A",
-      fare: parseFloat(formData.fare),
-      departure_time: departureDateTime,
-      totalSeats: 50,
-      bus_name: formData.bus_name,
-    });
-  };
+  //   await supabase.from("trips").insert({
+  //     origin: formData.origin,
+  //     destination: formData.destination,
+  //     distance: formData.distance || "N/A",
+  //     fare: parseFloat(formData.fare),
+  //     departure_time: departureDateTime,
+  //     totalSeats: 50,
+  //     bus_name: formData.bus_name,
+  //   });
+  // };
 
   const handleUpdateTime = () => {
     if (!selectedTrip || !editTime) return;
@@ -444,7 +483,7 @@ const AdminPage = () => {
             >
               {tab === "ongoing" ? "Ongoing Trips" : "Completed Trips"}
               <span className="admin-tab-count">
-                {tab === "ongoing" ? upcomingTrips.length : pastTrips.length}
+                {/* {tab === "ongoing" ? upcomingTrips.length : pastTrips.length} */}
               </span>
             </button>
           ))}
@@ -459,7 +498,7 @@ const AdminPage = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {upcomingTrips.length > 0 ? (
+              {/* {upcomingTrips.length > 0 ? (
                 <div className="admin-trips-grid">
                   {upcomingTrips.map((trip) => (
                     <TripAdminCard key={trip.id} trip={trip} />
@@ -467,7 +506,7 @@ const AdminPage = () => {
                 </div>
               ) : (
                 <p className="admin-empty">No upcoming trips.</p>
-              )}
+              )} */}
             </motion.div>
           ) : (
             <motion.div
@@ -518,17 +557,43 @@ const AdminPage = () => {
                 </button>
               </div>
               <div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Origin</label>
+                    <select
+                      name="origin"
+                      className="admin-form-input"
+                      value={formData.origin}
+                      onChange={(e) =>
+                        setFormData((p) => ({ ...p, origin: e.target.value }))
+                      }
+                    >
+                      <option value="">Select origin</option>
+                      {originDesti.map((origin) => (
+                        <option key={origin.location_id} value={origin.location_id}>
+                          {origin.city_name}
+                        </option>
+                      ))}
+                    </select>
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Destination</label>
+                    <select
+                      name="destination"
+                      className="admin-form-input"
+                      value={formData.destination}
+                      onChange={(e) =>
+                        setFormData((p) => ({ ...p, destination: e.target.value }))
+                      }
+                    >
+                      <option value="">Select destination</option>
+                      {originDesti.map((destination) => (
+                        <option key={destination.location_id} value={destination.location_id}>
+                          {destination.city_name}
+                        </option>
+                      ))}
+                    </select>
+                </div>
                 {[
-                  {
-                    label: "Origin *",
-                    key: "origin",
-                    placeholder: "e.g. Manila",
-                  },
-                  {
-                    label: "Destination *",
-                    key: "destination",
-                    placeholder: "e.g. Baguio",
-                  },
                   {
                     label: "Distance",
                     key: "distance",
@@ -576,7 +641,7 @@ const AdminPage = () => {
                   <div className="admin-form-group">
                     <label className="admin-form-label">Departure Time *</label>
                     <input
-                      type="text"
+                      type="time"
                       placeholder="e.g. 06:00 AM"
                       value={formData.departureTime}
                       onChange={(e) =>
@@ -597,7 +662,7 @@ const AdminPage = () => {
                 >
                   Cancel
                 </button>
-                <button onClick={handleAddTrip} className="admin-modal-submit">
+                <button type="submit" onClick={handleAddTrip} className="admin-modal-submit">
                   <Plus />
                   Add Trip
                 </button>

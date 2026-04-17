@@ -1,8 +1,8 @@
 import { supabase } from "../../supabaseClient";
 
 export async function createTrip(data) {
-  const { TripData: trips, error } = await supabase
-    .from("trips_tbl")
+  const { data: trips, error } = await supabase
+    .from("trips")
     .insert({
       origin: data.origin,
       destination: data.destination,
@@ -17,8 +17,21 @@ export async function createTrip(data) {
   if (error) {
     console.log("error moy ay: ", error);
   }
+  console.log("trip created: ", trips);
+  await createTripSeats(trips.id);
+}
 
-  await createTripSeats(TripData);
+export async function getOrigins() {
+  const {data, error} = await supabase
+    .from("city")
+    .select("*");
+
+    if(error) {
+      console.log("error:", error);
+      return null;
+    }
+    console.log("data is: ", data);
+    return data;
 }
 
 export async function createTripSeats(trip_id) {
@@ -26,7 +39,6 @@ export async function createTripSeats(trip_id) {
   const seats = Array.from({ length: 50 }, () => ({
     trip_id: trip_id,
     taken: false,
-    paid: false,
     taken_at: null,
     seat_owner: null,
   }));
