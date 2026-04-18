@@ -1,5 +1,10 @@
 .receipt-card {
-  background: linear-gradient(to bottom right, hsl(var(--background)), hsl(var(--muted) / 0.3), hsl(var(--muted)));
+  background: linear-gradient(
+    to bottom right,
+    var(--background),
+    var(--muted) / 0.3,
+    var(--muted)
+  );
   border-radius: 1.5rem;
   overflow: hidden;
   box-shadow: 0 4px 20px hsl(0 0% 0% / 0.08);
@@ -9,7 +14,7 @@
 }
 
 .receipt-header {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   padding: 1.5rem;
   text-align: center;
 }
@@ -25,18 +30,18 @@
 .receipt-header-brand svg {
   width: 1.5rem;
   height: 1.5rem;
-  color: hsl(var(--primary-foreground));
+  color: var(--primary-foreground);
 }
 
 .receipt-header-brand span {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   font-size: 1.25rem;
-  color: hsl(var(--primary-foreground));
+  color: var(--primary-foreground);
 }
 
 .receipt-header-subtitle {
-  color: hsl(var(--primary-foreground) / 0.7);
+  color: var(--primary-foreground) / 0.7;
   font-size: 0.75rem;
 }
 
@@ -45,6 +50,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  background-color: white;
 }
 
 .receipt-route {
@@ -56,10 +62,10 @@
 }
 
 .receipt-route-name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   font-size: 1.125rem;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .receipt-route-divider {
@@ -72,20 +78,20 @@
 .receipt-route-line {
   width: 2rem;
   height: 1px;
-  background: hsl(var(--primary));
+  background: var(--primary);
 }
 
 .receipt-route-divider svg {
   width: 0.875rem;
   height: 0.875rem;
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 
 .receipt-bus-name {
   text-align: center;
   font-size: 0.75rem;
   font-weight: 500;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .receipt-details {
@@ -98,18 +104,18 @@
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   font-weight: 500;
 }
 
 .receipt-detail-value {
   font-size: 0.875rem;
   font-weight: 600;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .receipt-passenger-box {
-  background: hsl(var(--muted) / 0.5);
+  background: var(--muted) / 0.5;
   border-radius: 1rem;
   padding: 1rem;
 }
@@ -118,47 +124,47 @@
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
 
 .receipt-passenger-name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .receipt-passenger-type {
   font-size: 0.75rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .receipt-fare-section {
   text-align: center;
   padding-top: 1rem;
-  border-top: 1px dashed hsl(var(--border));
+  border-top: 1px dashed var(--border);
 }
 
 .receipt-fare-label {
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
 
 .receipt-fare-value {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
   font-size: 2.25rem;
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 
 .receipt-discount {
   font-size: 0.75rem;
-  color: hsl(var(--secondary));
+  color: var(--secondary);
   font-weight: 500;
   margin-top: 0.25rem;
 }
@@ -171,7 +177,7 @@
   margin: 0.75rem auto 0;
   font-size: 0.875rem;
   font-weight: 500;
-  color: hsl(var(--primary));
+  color: var(--primary);
   background: none;
   border: none;
   cursor: pointer;
@@ -179,5 +185,5 @@
 }
 
 .receipt-save-btn:hover {
-  color: hsl(var(--primary) / 0.8);
+  color: var(--primary) / 0.8;
 }

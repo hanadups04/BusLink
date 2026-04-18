@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Bus, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import "./LoginPage.css";
+import * as custFunc from "../Backend/customer_funcs";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -19,13 +20,11 @@ const LoginPage = () => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       const users = JSON.parse(localStorage.getItem("buslink_users") || "[]");
-      const user = users.find(
-        (u) => u.email === email && u.password === btoa(password),
-      );
+      const user = await custFunc.loginUser(email, password);
       if (user) {
-        localStorage.setItem("buslink_current_user", JSON.stringify(user));
+        localStorage.setItem("buslink_current_user", JSON.stringify(user.id));
         toast.success(`Welcome back, ${user.username}!`);
         navigate("/");
       } else {

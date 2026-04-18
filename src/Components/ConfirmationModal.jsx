@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle } from "lucide-react";
 import "./ConfirmationModal.css";
@@ -10,6 +11,20 @@ const ConfirmationModal = ({
   passengers,
   totalFare,
 }) => {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [authCode, setAuthCode] = useState("");
+
+  const canConfirm = phoneNumber.trim() && authCode.trim();
+
+  const handleConfirm = () => {
+    if (!canConfirm) return;
+
+    onConfirm({
+      phoneNumber: phoneNumber.trim(),
+      authCode: authCode.trim(),
+    });
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -39,11 +54,39 @@ const ConfirmationModal = ({
               <div className="confirmation-route-box">
                 <p className="confirmation-route-label">Route</p>
                 <p className="confirmation-route-value">
-                  {trip.origin} → {trip.destination}
+                  {trip.origin.city_name} → {trip.destination.city_name}
                 </p>
-                <p className="confirmation-route-date">
-                  {trip.departureDate} · {trip.departureTime}
-                </p>
+                <p className="confirmation-route-date">{trip.departure_time}</p>
+              </div>
+
+              <div className="confirmation-inputs">
+                <label className="confirmation-field">
+                  <span className="confirmation-field-label">Phone Number</span>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    className="confirmation-field-input"
+                    placeholder="09xxxxxxxxx"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                  />
+                </label>
+
+                <label className="confirmation-field">
+                  <span className="confirmation-field-label">
+                    Authentication Code
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    className="confirmation-field-input"
+                    placeholder="Enter code"
+                    value={authCode}
+                    onChange={(e) => setAuthCode(e.target.value)}
+                  />
+                </label>
               </div>
 
               <div className="confirmation-pax-list">
@@ -75,7 +118,11 @@ const ConfirmationModal = ({
               <button onClick={onClose} className="confirmation-cancel-btn">
                 Cancel
               </button>
-              <button onClick={onConfirm} className="confirmation-confirm-btn">
+              <button
+                onClick={handleConfirm}
+                className="confirmation-confirm-btn"
+                disabled={!canConfirm}
+              >
                 <CheckCircle style={{ width: 16, height: 16 }} />
                 Confirm Booking
               </button>

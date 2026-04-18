@@ -39,7 +39,7 @@ const Navbar = () => {
     { to: "/", label: "Home" },
     { to: "/trips", label: "Trips" },
     { to: "/myBookings", label: "My Bookings" },
-    { to: "/admin", label: "Admin" },
+    // { to: "/admin", label: "Admin" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -78,9 +78,9 @@ const Navbar = () => {
           {currentUser ? (
             <>
               <div className="navbar-user-info">
-                <div className="navbar-user-avatar">
+                {/* <div className="navbar-user-avatar">
                   <User style={{ width: 14, height: 14 }} />
-                </div>
+                </div> */}
                 <span className="navbar-user-name">{currentUser.username}</span>
               </div>
               <button

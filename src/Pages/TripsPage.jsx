@@ -94,7 +94,7 @@ const TripsPage = () => {
             </p>
           </motion.div>
           <div className="mb-10">
-            <SearchBar onSearch={handleSearch} />
+            {/* <SearchBar onSearch={handleSearch} /> */}
           </div>
           {loading ? (
             <div className="empty-state">

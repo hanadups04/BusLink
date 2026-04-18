@@ -85,8 +85,8 @@ const LandingPage = () => {
               viewport={{ once: true }}
               className="mb-10"
             >
-              <span className="section-label">Popular Routes</span>
-              <h2 className="section-title">Featured Trips</h2>
+              {/* <span className="section-label">Popular Routes</span>
+              <h2 className="section-title">Featured Trips</h2> */}
             </motion.div>
             <div className="trips-grid">
               {/* {featuredTrips.map((trip, i) => (

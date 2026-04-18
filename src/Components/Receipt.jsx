@@ -38,7 +38,7 @@ const Receipt = ({ trip, passenger, index }) => {
         <div className="receipt-body">
           <div className="receipt-route">
             <div style={{ textAlign: "right" }}>
-              <p className="receipt-route-name">{trip.origin}</p>
+              <p className="receipt-route-name">{trip.origin.city_name}</p>
             </div>
             <div className="receipt-route-divider">
               <div className="receipt-route-line" />
@@ -46,11 +46,11 @@ const Receipt = ({ trip, passenger, index }) => {
               <div className="receipt-route-line" />
             </div>
             <div style={{ textAlign: "left" }}>
-              <p className="receipt-route-name">{trip.destination}</p>
+              <p className="receipt-route-name">{trip.destination.city_name}</p>
             </div>
           </div>
 
-          {trip.busName && <p className="receipt-bus-name">{trip.busName}</p>}
+          {trip.bus_name && <p className="receipt-bus-name">{trip.bus_name}</p>}
 
           <div className="receipt-details">
             <div>
@@ -59,12 +59,12 @@ const Receipt = ({ trip, passenger, index }) => {
             </div>
             <div>
               <p className="receipt-detail-label">Departure</p>
-              <p className="receipt-detail-value">{trip.departureTime}</p>
+              <p className="receipt-detail-value">{trip.departure_time}</p>
             </div>
-            <div>
+            {/* <div>
               <p className="receipt-detail-label">Date</p>
               <p className="receipt-detail-value">{trip.departureDate}</p>
-            </div>
+            </div> */}
             <div>
               <p className="receipt-detail-label">Seat</p>
               <p className="receipt-detail-value">{passenger.seatNumber}</p>

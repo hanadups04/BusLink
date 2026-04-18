@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import "./RegisterPage.css";
+import { createUser } from "../Backend/customer_funcs";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -49,27 +50,23 @@ const RegisterPage = () => {
     e.preventDefault();
     if (!isValid) return;
     setLoading(true);
-    setTimeout(() => {
-      const users = JSON.parse(localStorage.getItem("buslink_users") || "[]");
-      if (users.some((u) => u.email === email)) {
-        toast.error("An account with this email already exists");
-        setLoading(false);
-        return;
-      }
-      const newUser = {
-        id: crypto.randomUUID(),
-        username: username.trim(),
-        email: email.trim(),
-        password: btoa(password),
-        createdAt: new Date().toISOString(),
-      };
-      users.push(newUser);
-      localStorage.setItem("buslink_users", JSON.stringify(users));
-      localStorage.setItem("buslink_current_user", JSON.stringify(newUser));
+
+    const newUser = {
+      username: username.trim(),
+      Email: email.trim(),
+      password: password.trim(),
+    };
+
+    const create = await createUser(newUser);
+    if (create === 1) {
       toast.success("Account created successfully!");
       navigate("/");
       setLoading(false);
-    }, 800);
+    } else {
+      toast.success("Account creation failed!");
+      alert(create.message);
+      setLoading(false);
+    }
   };
 
   const strengthColors = [

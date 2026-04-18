@@ -45,7 +45,7 @@ const TripCard = ({ trip, index = 0, status, onClick }) => {
           </div>
         </div>
 
-        {trip.busName && <p className="trip-card-bus-name">{trip.busName}</p>}
+        {trip.bus_name && <p className="trip-card-bus-name">{trip.bus_name}</p>}
 
         <div className="trip-card-meta">
           <div className="trip-card-meta-item">

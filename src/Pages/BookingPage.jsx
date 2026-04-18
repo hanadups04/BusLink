@@ -43,6 +43,13 @@ const BookingPage = () => {
       isMounted = false;
     };
   }, []);
+
+  const occupiedSeats =
+    tripData.seats
+      ?.filter((seat) => seat.taken)
+      .map((seat) => seat.seat_number) ?? [];
+
+  const occupiedSeatsCount = occupiedSeats.length;
   // const trip = getTripById(tripId || "");
 
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -74,6 +81,7 @@ const BookingPage = () => {
   }
 
   const handleSeatToggle = (seat) => {
+    console.log("sleected seat", seat);
     if (selectedSeats.includes(seat)) {
       setSelectedSeats((prev) => prev.filter((s) => s !== seat));
       setPassengers((prev) =>
@@ -118,7 +126,7 @@ const BookingPage = () => {
   };
 
   const calculateFare = (type) => {
-    const base = trip.fare;
+    const base = tripData.fare;
     return ["Student", "Senior", "PWD"].includes(type)
       ? Math.round(base * 0.8)
       : base;
@@ -129,6 +137,9 @@ const BookingPage = () => {
     .map((p) => ({
       name: p.name,
       seatNumber: p.seatNumber,
+      seatId:
+        tripData.seats?.find((seat) => seat.seat_number === p.seatNumber)?.id ??
+        null,
       type: p.type,
       fare: calculateFare(p.type),
     }));
@@ -142,18 +153,53 @@ const BookingPage = () => {
     if (canBook) setShowModal(true);
   };
 
-  const handleConfirm = () => {
+  const currentUser = JSON.parse(
+    localStorage.getItem("buslink_current_user") || "null",
+  );
+
+  const handleConfirm = async () => {
     const booking = {
       id: `BK${Date.now()}`,
-      tripId: trip.id,
-      trip: { ...trip },
+      tripId: id,
+      trip: tripData,
       passengers: finalPassengers,
       totalFare,
       paymentMethod: "GCash",
       status: "Booked",
       bookedAt: new Date().toISOString(),
     };
-    addBooking(booking);
+
+    console.log("passengers: ", finalPassengers, "current user: ", currentUser);
+
+    const seatUpdates = await Promise.all(
+      finalPassengers.map((p) =>
+        Read.takeSeat({
+          seat_id: p.seatId,
+          user_id: currentUser,
+        }),
+      ),
+    );
+
+    const bookingUpdates = await Promise.all(
+      finalPassengers.map((p) =>
+        Read.createBooking({
+          trip_id: id,
+          seat_id: p.seatId,
+          owner_id: currentUser,
+          name: p.name,
+          passenger_type: p.type,
+          fare: p.fare,
+        }),
+      ),
+    );
+
+    const allSeatsUpdated = seatUpdates.every(Boolean);
+    const allbooking = bookingUpdates.every(Boolean);
+    if (!allSeatsUpdated || !allbooking) {
+      console.log("Failed to book all seats. Please try again.");
+      return;
+    }
+    // addBooking(booking);
     setCompletedBooking(booking);
     setShowModal(false);
     setBookingComplete(true);
@@ -193,7 +239,7 @@ const BookingPage = () => {
             ))}
           </div>
           <button
-            onClick={() => navigate("/my-bookings")}
+            onClick={() => navigate("/myBookings")}
             className="book-btn active"
             style={{ maxWidth: "16rem", margin: "3rem auto 0" }}
           >
@@ -235,10 +281,10 @@ const BookingPage = () => {
                     Select Your Seats
                   </h2>
                   <SeatSelector
-                  // totalSeats={tripData}
-                  // occupiedSeats={trip.seatsOccupied}
-                  // selectedSeats={selectedSeats}
-                  // onSeatToggle={handleSeatToggle}
+                    totalSeats={tripData.seats.length}
+                    occupiedSeats={occupiedSeats}
+                    selectedSeats={selectedSeats}
+                    onSeatToggle={handleSeatToggle}
                   />
                 </div>
                 <div
@@ -260,11 +306,10 @@ const BookingPage = () => {
                       {tripData.destination.city_name}
                     </p>
                     <p>
-                      <strong>Distance:</strong> {tripData.distance}
+                      <strong>Distance:</strong> {tripData.distance} KM
                     </p>
                     <p>
-                      <strong>Departure:</strong> {tripData.departure_time} ·{" "}
-                      {tripData.departure_time}
+                      <strong>Departure:</strong> {tripData.departure_time}
                     </p>
                   </div>
                   <div className="glass-card">

@@ -1,7 +1,7 @@
 import { supabase } from "../../supabaseClient";
 
 export async function createUser(data) {
-  const { error } = await supabase.from("users_tbl").insert({
+  const { error } = await supabase.from("users").insert({
     email: data.Email,
     password: data.password,
     username: data.username,
@@ -9,12 +9,15 @@ export async function createUser(data) {
 
   if (error) {
     console.log("error moy ay: ", error);
+    return error;
   }
+
+  return 1;
 }
 
 export async function loginUser(email, password) {
   const { data: userdata, error } = await supabase
-    .from("users_tbl")
+    .from("users")
     .select("*")
     .eq("email", email)
     .eq("password", password)
@@ -25,7 +28,8 @@ export async function loginUser(email, password) {
     return null;
   }
 
-  return data;
+  console.log("userdata: ", userdata);
+  return userdata;
 }
 
 export async function getTrips() {
@@ -34,6 +38,7 @@ export async function getTrips() {
       fare,
       distance,
       departure_time,
+      bus_name,
       origin:city!trips_origin_fkey (city_name),
       destination:city!trips_destination_fkey (city_name)
     `);
@@ -47,7 +52,7 @@ export async function getTrips() {
 }
 
 export async function createPayment(data) {
-  const { error } = await supabase.from("payments_tbl").insert({
+  const { error } = await supabase.from("payments").insert({
     trip_id: data.trip_id,
     seat_id: data.seat_id,
     status: data.status,
@@ -60,21 +65,34 @@ export async function createPayment(data) {
   }
 }
 
-export async function createBooking(data) {
-  const { error } = await supabase.from("bookings_tbl").insert({
-    trip_id: data.trip_id,
-    seat_id: data.seat_id,
-    payment_id: data.payment_id,
+export async function createBooking({
+  trip_id,
+  seat_id,
+  // payment_id,
+  owner_id,
+  name,
+  passenger_type,
+  fare,
+}) {
+  const { error } = await supabase.from("bookings").insert({
+    trip_id: trip_id,
+    seat_id: seat_id,
+    // payment_id: payment_id,
+    owner_id: owner_id,
+    name: name,
+    passenger_type: passenger_type,
+    fare: fare,
   });
 
   if (error) {
     console.log("error moy ay: ", error);
   }
+  return 1;
 }
 
 export async function takeSeat({ seat_id, user_id }) {
   const { data, error } = await supabase
-    .from("seats_tbl")
+    .from("seats")
     .update({
       taken: true,
       taken_at: new Date().toISOString(),
@@ -86,51 +104,46 @@ export async function takeSeat({ seat_id, user_id }) {
 
   if (error) {
     console.log("error moy ay: ", error);
-    return null;
+    return error;
   }
-
-  if (!data || data.length === 0) {
-    console.log("Seat already taken");
-    return null;
-  }
-
-  return data[0];
+  console.log("take seat", data);
+  return data;
 }
 
 export async function getUserBookings(user_id) {
   const { data, error } = await supabase
-    .from("bookings_tbl")
+    .from("bookings")
     .select(
       `
-      id,
-      trip_id,
-      seat_id,
-      payment:payments_tbl!bookings_tbl_payment_id_fkey (
-        id,
-        status,
-        paid_amount,
-        payee_id
+      *,
+      trip:trips!bookings_trip_id_fkey (
+        origin:city!trips_origin_fkey (city_name),
+        destination:city!trips_destination_fkey(city_name),
+        *
       ),
-      trip:trips_tbl!bookings_tbl_trip_id_fkey (
-        id,
-        fare,
-        distance
-      ),
-      seat:seats_tbl!bookings_tbl_seat_id_fkey (
-        id,
-        taken,
-        paid
-      )
+      seat:seats!bookings_seat_id_fkey (*)
     `,
     )
-    .eq("payments_tbl.payee_id", user_id); // filter by user
+    .eq("owner_id", user_id); // filter by user
 
   if (error) {
     console.log("error moy ay: ", error);
     return [];
   }
 
-  return data;
+  const formattedData = (data || []).map((booking) => ({
+    ...booking,
+    trip: booking.trip
+      ? {
+          ...booking.trip,
+          departure_time: booking.trip.departure_time
+            ? formatDateTime(booking.trip.departure_time)
+            : booking.trip.departure_time,
+        }
+      : booking.trip,
+  }));
+
+  return formattedData;
 }
 
 export async function getTripById(trip_id) {
@@ -141,11 +154,13 @@ export async function getTripById(trip_id) {
       id,
       fare,
       distance,
+      bus_name,
       departure_time,
       origin:city!trips_origin_fkey (city_name),
       destination:city!trips_destination_fkey (city_name),
       seats:seats (
         id,
+        seat_number,
         taken
       )
     `,
@@ -157,6 +172,28 @@ export async function getTripById(trip_id) {
     console.log("error moy ay: ", error);
     return null;
   }
-  console.log("data is: ", data);
-  return data;
+
+  const formattedData = {
+    ...data,
+    departure_time: formatDateTime(data.departure_time),
+  };
+  console.log("data is: ", formattedData);
+  return formattedData;
+}
+
+function parseTimestamp(ts) {
+  return new Date(ts.replace(" ", "T"));
+}
+
+function formatDateTime(ts) {
+  const date = parseTimestamp(ts);
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila", // important for PH apps
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
