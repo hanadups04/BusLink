@@ -20,6 +20,7 @@ import * as AdminFunction from "../Backend/admin_funcs";
 import * as CustomerFunction from "../Backend/customer_funcs";
 // import { getTrips, addTrip, updateTripDepartureTime, cancelTrip, getTripBookings } from "../Backend/tripsData";
 import "./AdminPage.css";
+import { getTripById } from "../Backend/customer_funcs";
 
 const emptyForm = {
   origin: "",
@@ -43,6 +44,7 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("ongoing");
   const [originDesti, setOriginDesti] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [seatData, setSeatData] = useState([]);
 
   const getOriginLabel = (trip) => trip?.origin?.city_name ?? trip?.origin;
   const getDestinationLabel = (trip) =>
@@ -200,6 +202,16 @@ const AdminPage = () => {
     setShowEditModal(true);
   };
 
+  async function getSeats(id) {
+    try {
+      const data = await getTripById(id);
+      setSeatData(data);
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+  }
+
   const TripAdminCard = ({ trip, isPast }) => {
     const bookingCount = trip?.bookingCount ?? 0;
     const originLabel = getOriginLabel(trip);
@@ -211,15 +223,17 @@ const AdminPage = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -4, scale: 1.01 }}
-        onClick={() =>
+        onClick={async () => {
+          await getSeats(trip.id);
+
           setSelectedTrip({
             ...trip,
             totalSeats: trip?.totalSeats ?? 50,
             seatsOccupied: trip?.seatsOccupied ?? [],
             departureDate: departureDate ?? trip?.departureDate,
             departureTime: departureTime ?? trip?.departureTime,
-          })
-        }
+          });
+        }}
         className="admin-trip-card"
       >
         <div className="admin-trip-card-inner">
@@ -295,6 +309,13 @@ const AdminPage = () => {
     );
   };
 
+  const occupiedSeats =
+    seatData?.seats
+      ?.filter((seat) => seat.taken)
+      .map((seat) => seat.seat_number) ?? [];
+
+  const totalSeats = seatData?.seats?.length ?? selectedTrip.totalSeats ?? 50;
+
   // Trip detail view
   if (selectedTrip && !showEditModal) {
     const bookings = [];
@@ -302,9 +323,10 @@ const AdminPage = () => {
     const destinationLabel = getDestinationLabel(selectedTrip);
     const departureDate = getDepartureDate(selectedTrip);
     const departureTime = getDepartureTime(selectedTrip);
+
     return (
       <div className="admin-page">
-        <Navbar />
+        <NavbarAdmin />
         <div className="pt-28 pb-20 container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -336,8 +358,8 @@ const AdminPage = () => {
               <div className="admin-detail-card">
                 <h2>Seat Layout</h2>
                 <SeatSelector
-                  totalSeats={selectedTrip.totalSeats ?? 50}
-                  occupiedSeats={selectedTrip.seatsOccupied ?? []}
+                  totalSeats={totalSeats}
+                  occupiedSeats={occupiedSeats}
                   selectedSeats={[]}
                   onSeatToggle={() => {}}
                 />
@@ -430,16 +452,12 @@ const AdminPage = () => {
                   <div className="admin-availability-row">
                     <span>Occupied</span>
                     <span>
-                      {(selectedTrip.seatsOccupied ?? []).length} /{" "}
-                      {selectedTrip.totalSeats ?? 50}
+                      {occupiedSeats.length} / {totalSeats}
                     </span>
                   </div>
                   <div className="admin-availability-row">
                     <span>Available</span>
-                    <span>
-                      {(selectedTrip.totalSeats ?? 50) -
-                        (selectedTrip.seatsOccupied ?? []).length}
-                    </span>
+                    <span>{totalSeats - occupiedSeats.length}</span>
                   </div>
                 </div>
               </div>

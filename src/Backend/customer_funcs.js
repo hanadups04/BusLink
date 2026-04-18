@@ -177,7 +177,7 @@ export async function getTripById(trip_id) {
     ...data,
     departure_time: formatDateTime(data.departure_time),
   };
-  console.log("data is: ", formattedData);
+  console.log("dataseat is: ", formattedData);
   return formattedData;
 }
 
