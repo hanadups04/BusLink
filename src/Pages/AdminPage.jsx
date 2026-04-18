@@ -170,8 +170,24 @@ const AdminPage = () => {
 
   const handleUpdateTime = () => {
     if (!selectedTrip || !editTime) return;
-    const date = getDepartureDate(trip);
+
+    const tripToEdit = trips.find((t) => t.id === selectedTrip);
+    if (!tripToEdit?.departure_time) return;
+
+    const parsed = new Date(tripToEdit.departure_time);
+
+    if (Number.isNaN(parsed.getTime())) {
+      console.log("Could not parse departure_time:", tripToEdit.departure_time);
+      showNotif("Invalid departure date format.", "error");
+      return;
+    }
+
+    const yyyy = parsed.getFullYear();
+    const mm = String(parsed.getMonth() + 1).padStart(2, "0");
+    const dd = String(parsed.getDate()).padStart(2, "0");
+    const date = `${yyyy}-${mm}-${dd}`;
     const newDepartureTs = `${date}T${editTime}:00+08:00`;
+
     AdminFunction.updateTripDeparture(selectedTrip, newDepartureTs);
     console.log("edited time", selectedTrip, newDepartureTs);
     setShowEditModal(false);
@@ -194,7 +210,13 @@ const AdminPage = () => {
 
   const openEditModal = (trip) => {
     setSelectedTrip(trip.id);
-    setEditTime(getDepartureTime(trip));
+    const time =
+      typeof trip.departure_time === "string" &&
+      trip.departure_time.includes("T")
+        ? trip.departure_time.split("T")[1].slice(0, 5)
+        : "";
+
+    setEditTime(time);
     setShowEditModal(true);
   };
 
@@ -283,14 +305,20 @@ const AdminPage = () => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
-                    onClick={() => openEditModal(trip)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(trip);
+                    }}
                     className="admin-card-action-btn admin-card-action-btn--edit"
                   >
                     <Edit3 />
                   </button>
                   <button
                     type="submit"
-                    onClick={() => handleCancelTrip(trip)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancelTrip(trip);
+                    }}
                     className="admin-card-action-btn admin-card-action-btn--delete"
                   >
                     <Trash2 />
