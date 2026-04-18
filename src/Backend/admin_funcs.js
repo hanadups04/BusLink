@@ -1,13 +1,15 @@
 import { supabase } from "../../supabaseClient";
 
 export async function createTrip(data) {
-  const { TripData: trips, error } = await supabase
-    .from("trips_tbl")
+  const { data: trips, error } = await supabase
+    .from("trips")
     .insert({
       origin: data.origin,
       destination: data.destination,
       fare: data.fare,
       distance: data.distance,
+      departure_time: data.departure_time,
+      bus_name: data.bus_name
     })
     .select()
     .single();
@@ -15,8 +17,21 @@ export async function createTrip(data) {
   if (error) {
     console.log("error moy ay: ", error);
   }
+  console.log("trip created: ", trips);
+  await createTripSeats(trips.id);
+}
 
-  await createTripSeats(TripData);
+export async function getOrigins() {
+  const {data, error} = await supabase
+    .from("city")
+    .select("*");
+
+    if(error) {
+      console.log("error:", error);
+      return null;
+    }
+    console.log("data is: ", data);
+    return data;
 }
 
 export async function createTripSeats(trip_id) {
@@ -24,12 +39,11 @@ export async function createTripSeats(trip_id) {
   const seats = Array.from({ length: 50 }, () => ({
     trip_id: trip_id,
     taken: false,
-    paid: false,
     taken_at: null,
     seat_owner: null,
   }));
 
-  const { error } = await supabase.from("seats_tbl").insert(seats);
+  const { error } = await supabase.from("seats").insert(seats);
 
   if (error) {
     console.log("error moy ay: ", error);
@@ -68,7 +82,7 @@ export async function deleteTripIfNoBookings(trip_id) {
 
 export async function updateTripDeparture(trip_id, departure_time) {
   const { error } = await supabase
-    .from("trips_tbl")
+    .from("trips")
     .update({
       departure_time: departure_time,
     })
@@ -80,4 +94,42 @@ export async function updateTripDeparture(trip_id, departure_time) {
   }
 
   return true;
+}
+
+export async function canDelete(trip_id) {
+  const { data, error } = await supabase
+    .from("seats")
+    .select("id, taken")
+    .eq("trip_id", trip_id);
+
+  if (error) {
+    console.log("error", error);
+    return error;
+  }
+
+  const hasTakenSeat = data.some((seat) => seat.taken === true);
+
+  if (hasTakenSeat) {
+    console.log("some seats are taken. not allowed to delete");
+    return false;
+  } else {
+    await supabase.from("trips").delete().eq("id", trip_id);
+    return !hasTakenSeat;
+  }
+}
+
+export async function adminLogin(email, password) {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .eq("password", password)
+    .single();
+
+    if (error) {
+      console.log("errorboo", error);
+      return null;
+    }
+
+  return data;
 }

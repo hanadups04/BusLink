@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  Shield,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
 import { toast } from "sonner";
 import "./AdminLoginPage.css";
+import * as AdminFunction from "../Backend/admin_funcs";
 
 const AdminLoginPage = () => {
   const navigate = useNavigate();
@@ -20,25 +29,20 @@ const AdminLoginPage = () => {
     }
 
     setLoading(true);
-
-    setTimeout(() => {
-      const admins = JSON.parse(localStorage.getItem("buslink_admins") || "[]");
-      const admin = admins.find(
-        (a) => a.email === email && a.password === btoa(password)
-      );
-
-      if (admin || (email === "admin@buslink.com" && password === "admin123")) {
-        localStorage.setItem(
-          "buslink_current_admin",
-          JSON.stringify(admin || { email, username: "Admin" })
-        );
+    try {
+      const admin = await AdminFunction.adminLogin(email, password);
+      if (admin) {
         toast.success("Welcome, Admin!");
         navigate("/admin");
       } else {
         toast.error("Invalid admin credentials");
       }
+    } catch (err) {
+      console.error(err);
+      toast.error("Login failed. Please try again.");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -52,7 +56,9 @@ const AdminLoginPage = () => {
         {/* Left branding */}
         <div className="admin-login-branding">
           <Link to="/" className="admin-login-logo">
-            <div className="admin-login-logo-icon"><Shield /></div>
+            <div className="admin-login-logo-icon">
+              <Shield />
+            </div>
             <span className="admin-login-logo-text">
               Bus<span className="gradient">Link</span>
               <span className="admin-label">Admin</span>
@@ -60,10 +66,14 @@ const AdminLoginPage = () => {
           </Link>
 
           <h1>
-            Admin<br />
+            Admin
+            <br />
             <span className="gradient">Control Panel</span>
           </h1>
-          <p>Manage trips, monitor bookings, and keep your fleet running smoothly.</p>
+          <p>
+            Manage trips, monitor bookings, and keep your fleet running
+            smoothly.
+          </p>
 
           <div className="admin-login-stats">
             {[
@@ -83,8 +93,22 @@ const AdminLoginPage = () => {
         <div className="admin-login-form-wrapper">
           <div className="admin-login-card">
             <div className="admin-login-mobile-logo">
-              <div className="admin-login-mobile-logo-icon"><Shield style={{ width: 20, height: 20, color: "white" }} /></div>
-              <span>Bus<span style={{ background: "linear-gradient(135deg, hsl(0,89%,41%), hsl(24,100%,50%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Link</span></span>
+              <div className="admin-login-mobile-logo-icon">
+                <Shield style={{ width: 20, height: 20, color: "white" }} />
+              </div>
+              <span>
+                Bus
+                <span
+                  style={{
+                    background:
+                      "linear-gradient(135deg, hsl(0,89%,41%), hsl(24,100%,50%))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Link
+                </span>
+              </span>
             </div>
 
             <h2>Admin Login</h2>
@@ -127,7 +151,11 @@ const AdminLoginPage = () => {
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className="admin-login-submit">
+              <button
+                type="submit"
+                disabled={loading}
+                className="admin-login-submit"
+              >
                 {loading ? (
                   <div className="admin-login-spinner" />
                 ) : (
