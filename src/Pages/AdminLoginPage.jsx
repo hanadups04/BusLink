@@ -55,7 +55,7 @@ const AdminLoginPage = () => {
       <div className="admin-login-container">
         {/* Left branding */}
         <div className="admin-login-branding">
-          <Link to="/" className="admin-login-logo">
+          <Link className="admin-login-logo">
             <div className="admin-login-logo-icon">
               <Shield />
             </div>
@@ -167,15 +167,15 @@ const AdminLoginPage = () => {
               </button>
             </form>
 
-            <div className="admin-login-links">
+            {/* <div className="admin-login-links">
               <span>Not an admin? </span>
               <Link to="/login">User Login</Link>
-            </div>
+            </div> */}
 
-            <Link to="/" className="admin-login-back">
+            {/* <Link to="/admin" className="admin-login-back">
               <ArrowLeft />
               Back to Home
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

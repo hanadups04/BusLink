@@ -194,7 +194,9 @@
 }
 .admin-login-field .input-wrapper {
   position: relative;
+  background: hsla(0, 0%, 100%, 0.5);
 }
+
 .admin-login-field .input-wrapper svg {
   position: absolute;
   left: 1rem;
@@ -208,14 +210,15 @@
   width: 100%;
   height: 3rem;
   padding-left: 2.75rem;
-  padding-right: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid hsl(0, 0%, 90%);
-  background: hsla(0, 0%, 100%, 0.5);
+  border: none;
+  border-color: none;
+  background: transparent;
   font-size: 0.875rem;
   color: hsl(0, 0%, 8%);
   transition: all 0.2s;
   font-family: inherit;
+  padding-right: 3rem; 
 }
 .admin-login-field input::placeholder { color: hsl(0, 0%, 40%); }
 .admin-login-field input:focus {
@@ -224,14 +227,14 @@
 }
 .admin-login-field .toggle-password {
   position: absolute;
-  right: 1rem;
+  right: 3rem;
   top: 50%;
   transform: translateY(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
   background: none;
   border: none;
-  cursor: pointer;
-  color: hsl(0, 0%, 40%);
-  transition: color 0.2s;
   padding: 0;
 }
 .admin-login-field .toggle-password:hover { color: hsl(0, 0%, 8%); }

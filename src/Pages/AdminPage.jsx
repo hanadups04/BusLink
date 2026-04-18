@@ -14,7 +14,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import NavbarAdmin from "../Components/NavbarAdmin";
-import Footer from "../Components/Footer";
+import Footer from "../Components/FooterAdmin";
 import SeatSelector from "../Components/SeatSelector";
 import * as AdminFunction from "../Backend/admin_funcs";
 import * as CustomerFunction from "../Backend/customer_funcs";

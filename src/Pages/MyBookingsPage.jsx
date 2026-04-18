@@ -204,7 +204,7 @@ const MyBookingsPage = () => {
               You haven't booked any trips. Start exploring available routes and
               book your first ride!
             </p>
-            <button onClick={() => navigate("/")} className="book-now-btn">
+            <button onClick={() => navigate("/trips")} className="book-now-btn">
               Book Now →
             </button>
           </motion.div>

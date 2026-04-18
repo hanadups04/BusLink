@@ -47,7 +47,7 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${scrolled ? "navbar--scrolled" : ""}`}>
       <div className="navbar-container">
-        <Link to="/" className="navbar-brand">
+        <Link className="navbar-brand">
           <div className="navbar-brand-icon">
             <Bus style={{ width: 20, height: 20 }} />
           </div>
@@ -93,12 +93,12 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/adminLogin" className="navbar-login-link">
+              {/* <Link to="/adminLogin" className="navbar-login-link">
                 Login
-              </Link>
-              <Link to="/register" className="navbar-register-link">
-                Register
-              </Link>
+              </Link> */}
+              {/* <Link to="/adminLogin" className="navbar-register-link">
+                Login
+              </Link> */}
             </>
           )}
         </div>
@@ -147,7 +147,7 @@ const Navbar = () => {
                   </button>
                 ) : (
                   <>
-                    <Link
+                    {/* <Link
                       to="/adminLogin"
                       onClick={() => setMobileOpen(false)}
                       className="navbar-login-link"
@@ -160,7 +160,7 @@ const Navbar = () => {
                       className="navbar-register-link"
                     >
                       Register
-                    </Link>
+                    </Link> */}
                   </>
                 )}
               </div>
