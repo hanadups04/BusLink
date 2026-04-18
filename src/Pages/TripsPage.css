@@ -44,10 +44,16 @@
 }
 
 @media (min-width: 768px) {
-  .trips-grid { grid-template-columns: repeat(2, 1fr); }
-  .trips-header h1 { font-size: 3rem; }
+  .trips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .trips-header h1 {
+    font-size: 3rem;
+  }
 }
 
 @media (min-width: 1024px) {
-  .trips-grid { grid-template-columns: repeat(3, 1fr); }
+  .trips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

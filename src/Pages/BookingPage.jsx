@@ -46,8 +46,8 @@ const BookingPage = () => {
 
   const occupiedSeats =
     tripData.seats
-      ?.map((seat, index) => (seat.taken ? index + 1 : null))
-      .filter((seatNo) => seatNo !== null) ?? [];
+      ?.filter((seat) => seat.taken)
+      .map((seat) => seat.seat_number) ?? [];
 
   const occupiedSeatsCount = occupiedSeats.length;
   // const trip = getTripById(tripId || "");
@@ -132,15 +132,17 @@ const BookingPage = () => {
       : base;
   };
 
-const finalPassengers = passengers
-  .filter((p) => p.name && p.seatNumber)
-  .map((p) => ({
-    name: p.name,
-    seatNumber: p.seatNumber,
-    seatId: tripData.seats?.[p.seatNumber - 1]?.id ?? null,
-    type: p.type,
-    fare: calculateFare(p.type),
-  }));
+  const finalPassengers = passengers
+    .filter((p) => p.name && p.seatNumber)
+    .map((p) => ({
+      name: p.name,
+      seatNumber: p.seatNumber,
+      seatId:
+        tripData.seats?.find((seat) => seat.seat_number === p.seatNumber)?.id ??
+        null,
+      type: p.type,
+      fare: calculateFare(p.type),
+    }));
 
   const totalFare = finalPassengers.reduce((sum, p) => sum + p.fare, 0);
   const canBook =
@@ -152,8 +154,8 @@ const finalPassengers = passengers
   };
 
   const currentUser = JSON.parse(
-  localStorage.getItem("buslink_current_user") || "null",
-);
+    localStorage.getItem("buslink_current_user") || "null",
+  );
 
   const handleConfirm = async () => {
     const booking = {
@@ -167,19 +169,33 @@ const finalPassengers = passengers
       bookedAt: new Date().toISOString(),
     };
 
-    console.log("passengers: ", finalPassengers, "current user: ", currentUser  );
+    console.log("passengers: ", finalPassengers, "current user: ", currentUser);
 
     const seatUpdates = await Promise.all(
       finalPassengers.map((p) =>
         Read.takeSeat({
           seat_id: p.seatId,
-          user_id: currentUser, 
+          user_id: currentUser,
+        }),
+      ),
+    );
+
+    const bookingUpdates = await Promise.all(
+      finalPassengers.map((p) =>
+        Read.createBooking({
+          trip_id: id,
+          seat_id: p.seatId,
+          owner_id: currentUser,
+          name: p.name,
+          passenger_type: p.type,
+          fare: p.fare,
         }),
       ),
     );
 
     const allSeatsUpdated = seatUpdates.every(Boolean);
-    if(!allSeatsUpdated) {
+    const allbooking = bookingUpdates.every(Boolean);
+    if (!allSeatsUpdated || !allbooking) {
       console.log("Failed to book all seats. Please try again.");
       return;
     }
@@ -223,7 +239,7 @@ const finalPassengers = passengers
             ))}
           </div>
           <button
-            onClick={() => navigate("/my-bookings")}
+            onClick={() => navigate("/myBookings")}
             className="book-btn active"
             style={{ maxWidth: "16rem", margin: "3rem auto 0" }}
           >
