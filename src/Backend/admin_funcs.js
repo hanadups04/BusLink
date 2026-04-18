@@ -36,11 +36,12 @@ export async function getOrigins() {
 
 export async function createTripSeats(trip_id) {
   // generate 50 seat rows
-  const seats = Array.from({ length: 50 }, () => ({
+  const seats = Array.from({ length: 50 }, (_, index) => ({
     trip_id: trip_id,
     taken: false,
     taken_at: null,
     seat_owner: null,
+    seat_number: index + 1
   }));
 
   const { error } = await supabase.from("seats").insert(seats);
