@@ -63,18 +63,16 @@ const TripCard = ({ trip, index = 0, status, onClick }) => {
           </div>
         </div>
 
-        {/* <div className="trip-card-departure"> 
+        <div className="trip-card-departure">
           <div>
             <span className="trip-card-departure-date">
-              {trip.departureDate}
+              {trip.departure_time}
             </span>
-            {" · "}
-            {trip.departureTime}
           </div>
-          <div className="trip-card-seats-left">
+          {/* <div className="trip-card-seats-left">
             {trip.totalSeats - trip.seatsOccupied.length} seats left
-          </div>
-        </div> */}
+          </div> */}
+        </div>
       </div>
     </motion.div>
   );

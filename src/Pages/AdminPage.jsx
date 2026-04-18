@@ -49,39 +49,35 @@ const AdminPage = () => {
   const getOriginLabel = (trip) => trip?.origin?.city_name ?? trip?.origin;
   const getDestinationLabel = (trip) =>
     trip?.destination?.city_name ?? trip?.destination;
-  const getDepartureDate = (trip) => {
-    if (trip?.departureDate) return trip.departureDate;
-    const departureTime = trip?.departure_time ?? trip?.departureTime;
-    if (typeof departureTime === "string" && departureTime.includes("T")) {
-      return departureTime.split("T")[0];
-    }
-    return null;
-  };
-  const getDepartureTime = (trip) => {
-    if (trip?.departureTime) return trip.departureTime;
-    const departureTime = trip?.departure_time;
-    if (typeof departureTime === "string" && departureTime.includes("T")) {
-      return departureTime.split("T")[1]?.slice(0, 5) ?? null;
-    }
-    return null;
-  };
+  // const getDepartureDate = (trip) => {
+  //   if (trip?.departureDate) return trip.departureDate;
+  //   const departureTime = trip?.departure_time ?? trip?.departureTime;
+  //   if (typeof departureTime === "string" && departureTime.includes("T")) {
+  //     return departureTime.split("T")[0];
+  //   }
+  //   return null;
+  // };
+  // const getDepartureTime = (trip) => {
+  //   if (trip?.departureTime) return trip.departureTime;
+  //   const departureTime = trip?.departure_time;
+  //   if (typeof departureTime === "string" && departureTime.includes("T")) {
+  //     return departureTime.split("T")[1]?.slice(0, 5) ?? null;
+  //   }
+  //   return null;
+  // };
 
   const upcomingTrips = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    return trips.filter((t) => {
-      const d = getDepartureDate(t);
-      if (!d) return false;
-      return new Date(`${d}T00:00:00`) >= new Date(`${today}T00:00:00`);
-    });
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    return trips.filter((t) => new Date(t.departure_time) >= startOfToday);
   }, [trips]);
 
   const pastTrips = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    return trips.filter((t) => {
-      const d = getDepartureDate(t);
-      if (!d) return false;
-      return new Date(`${d}T00:00:00`) < new Date(`${today}T00:00:00`);
-    });
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    return trips.filter((t) => new Date(t.departure_time) < startOfToday);
   }, [trips]);
 
   const showNotif = (msg, type) => {
@@ -216,8 +212,8 @@ const AdminPage = () => {
     const bookingCount = trip?.bookingCount ?? 0;
     const originLabel = getOriginLabel(trip);
     const destinationLabel = getDestinationLabel(trip);
-    const departureDate = getDepartureDate(trip);
-    const departureTime = getDepartureTime(trip);
+    // const departureDate = getDepartureDate(trip);
+    // const departureTime = getDepartureTime(trip);
     return (
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -230,8 +226,8 @@ const AdminPage = () => {
             ...trip,
             totalSeats: trip?.totalSeats ?? 50,
             seatsOccupied: trip?.seatsOccupied ?? [],
-            departureDate: departureDate ?? trip?.departureDate,
-            departureTime: departureTime ?? trip?.departureTime,
+            // departureDate: departureDate ?? trip?.departureDate,
+            // departureTime: departureTime ?? trip?.departureTime,
           });
         }}
         className="admin-trip-card"
@@ -256,16 +252,16 @@ const AdminPage = () => {
               </div>
               <p className="admin-card-meta-value">{trip.distance}</p>
             </div>
-            <div>
+            {/* <div>
               <div className="admin-card-meta-label">
                 <Clock />
                 <span>Departure</span>
               </div>
               <p className="admin-card-meta-value">
-                {departureDate}
+                {trip.departure_time}
                 {departureTime ? ` · ${departureTime}` : ""}
               </p>
-            </div>
+            </div> */}
             <div style={{ textAlign: "right" }}>
               <span className="admin-card-meta-label">
                 <span>Fare</span>
@@ -275,8 +271,7 @@ const AdminPage = () => {
           </div>
           <div className="admin-card-footer">
             <div className="admin-card-footer-left">
-              <strong>{departureDate}</strong>
-              {departureTime ? ` · ${departureTime}` : ""}
+              <strong>{trip.departure_time}</strong>
             </div>
             <div className="admin-card-footer-right">
               <span className="admin-card-booking-count">
@@ -321,9 +316,8 @@ const AdminPage = () => {
     const bookings = [];
     const originLabel = getOriginLabel(selectedTrip);
     const destinationLabel = getDestinationLabel(selectedTrip);
-    const departureDate = getDepartureDate(selectedTrip);
-    const departureTime = getDepartureTime(selectedTrip);
-
+    // const departureDate = getDepartureDate(selectedTrip);
+    // const departureTime = getDepartureTime(selectedTrip);
     return (
       <div className="admin-page">
         <NavbarAdmin />
@@ -407,8 +401,8 @@ const AdminPage = () => {
                     <div>
                       <p className="admin-info-label">Departure</p>
                       <p className="admin-info-value">
-                        {departureDate}
-                        {departureTime ? ` · ${departureTime}` : ""}
+                        {/* {departureDate}
+                        {departureTime ? ` · ${departureTime}` : ""} */}
                       </p>
                     </div>
                   </div>
@@ -782,7 +776,7 @@ const AdminPage = () => {
               </div>
               <p className="admin-modal-trip-info">
                 {getOriginLabel(trip)} → {getDestinationLabel(trip)} ·{" "}
-                {getDepartureDate(trip)}
+                {trip.departure_time}
               </p>
               <div className="admin-form-group">
                 <label className="admin-form-label">New Departure Time</label>

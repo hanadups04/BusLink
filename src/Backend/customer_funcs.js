@@ -47,8 +47,17 @@ export async function getTrips() {
     console.log("error moy ay: ", error);
     return [];
   }
-  console.log("trip datas: ", data);
-  return data;
+  
+  const formattedData = (data || []).map((trip) => ({
+    ...trip,
+    departure_time: trip.departure_time
+      ? formatDateTime(trip.departure_time)
+      : trip.departure_time,
+  }));
+  console.log("trip datas: ", formattedData);
+
+  return formattedData;
+
 }
 
 export async function createPayment(data) {
