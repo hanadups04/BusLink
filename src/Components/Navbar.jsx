@@ -93,12 +93,12 @@ const Navbar = () => {
         <div className="navbar-auth">
           {currentUser ? (
             <>
-              <div className="navbar-user-info">
-                {/* <div className="navbar-user-avatar">
+              {/* <div className="navbar-user-info">
+                <div className="navbar-user-avatar">
                   <User style={{ width: 14, height: 14 }} />
-                </div> */}
+                </div>
                 <span className="navbar-user-name">{currentUser.username}</span>
-              </div>
+              </div> */}
               <button
                 onClick={handleLogout}
                 className="navbar-logout-btn"

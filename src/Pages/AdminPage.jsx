@@ -304,13 +304,6 @@ const AdminPage = () => {
     );
   };
 
-  const occupiedSeats =
-    seatData?.seats
-      ?.filter((seat) => seat.taken)
-      .map((seat) => seat.seat_number) ?? [];
-
-  const totalSeats = seatData?.seats?.length ?? selectedTrip.totalSeats ?? 50;
-
   // Trip detail view
   if (selectedTrip && !showEditModal) {
     const bookings = [];
@@ -318,6 +311,13 @@ const AdminPage = () => {
     const destinationLabel = getDestinationLabel(selectedTrip);
     // const departureDate = getDepartureDate(selectedTrip);
     // const departureTime = getDepartureTime(selectedTrip);
+
+    const occupiedSeats =
+      seatData?.seats
+        ?.filter((seat) => seat.taken)
+        .map((seat) => seat.seat_number) ?? [];
+
+    const totalSeats = seatData?.seats?.length ?? selectedTrip.totalSeats ?? 50;
     return (
       <div className="admin-page">
         <NavbarAdmin />
