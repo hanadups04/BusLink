@@ -13,11 +13,11 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import Navbar from "../Components/Navbar";
+import NavbarAdmin from "../Components/NavbarAdmin";
 import Footer from "../Components/Footer";
 import SeatSelector from "../Components/SeatSelector";
-import * as AdminFunction from "../Backend/admin_funcs"
-import * as CustomerFunction from "../Backend/customer_funcs"
+import * as AdminFunction from "../Backend/admin_funcs";
+import * as CustomerFunction from "../Backend/customer_funcs";
 // import { getTrips, addTrip, updateTripDepartureTime, cancelTrip, getTripBookings } from "../Backend/tripsData";
 import "./AdminPage.css";
 
@@ -42,66 +42,85 @@ const AdminPage = () => {
   const [, setRefresh] = useState(0);
   const [activeTab, setActiveTab] = useState("ongoing");
   const [originDesti, setOriginDesti] = useState([]);
-const [trips, setTrips] = useState([]);
-  
-  const now = new Date();
+  const [trips, setTrips] = useState([]);
 
-  // const upcomingTrips = useMemo(() => {
-  //   return trips.filter(
-  //     (t) =>
-  //       new Date(`${t.departureDate}T00:00:00`) >=
-  //       new Date(now.toISOString().split("T")[0]),
-  //   );
-  // }, [trips]);
+  const getOriginLabel = (trip) => trip?.origin?.city_name ?? trip?.origin;
+  const getDestinationLabel = (trip) =>
+    trip?.destination?.city_name ?? trip?.destination;
+  const getDepartureDate = (trip) => {
+    if (trip?.departureDate) return trip.departureDate;
+    const departureTime = trip?.departure_time ?? trip?.departureTime;
+    if (typeof departureTime === "string" && departureTime.includes("T")) {
+      return departureTime.split("T")[0];
+    }
+    return null;
+  };
+  const getDepartureTime = (trip) => {
+    if (trip?.departureTime) return trip.departureTime;
+    const departureTime = trip?.departure_time;
+    if (typeof departureTime === "string" && departureTime.includes("T")) {
+      return departureTime.split("T")[1]?.slice(0, 5) ?? null;
+    }
+    return null;
+  };
 
-  // const pastTrips = useMemo(() => {
-  //   return trips.filter(
-  //     (t) =>
-  //       new Date(`${t.departureDate}T00:00:00`) <
-  //       new Date(now.toISOString().split("T")[0]),
-  //   );
-  // }, [trips]);
+  const upcomingTrips = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return trips.filter((t) => {
+      const d = getDepartureDate(t);
+      if (!d) return false;
+      return new Date(`${d}T00:00:00`) >= new Date(`${today}T00:00:00`);
+    });
+  }, [trips]);
+
+  const pastTrips = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return trips.filter((t) => {
+      const d = getDepartureDate(t);
+      if (!d) return false;
+      return new Date(`${d}T00:00:00`) < new Date(`${today}T00:00:00`);
+    });
+  }, [trips]);
 
   const showNotif = (msg, type) => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-useEffect(() => {
-  let isMounted = true;
+  useEffect(() => {
+    let isMounted = true;
 
-  const getData = async () => {
-    try {
-      setLoading(true);
+    const getData = async () => {
+      try {
+        // setLoading(true);
 
-      const [tripss, originDestination] = await Promise.all([
-        CustomerFunction.getTrips(),
-        AdminFunction.getOrigins(),
-      ]);
+        const [tripss, originDestination] = await Promise.all([
+          CustomerFunction.getTrips(),
+          AdminFunction.getOrigins(),
+        ]);
 
-      if (isMounted) {
-        setTrips(tripss);
-        setOriginDesti(originDestination);
+        if (isMounted) {
+          setTrips(tripss);
+          setOriginDesti(originDestination);
+        }
+
+        console.log("trips: ", tripss);
+        console.log("originDestination: ", originDestination);
+      } catch (error) {
+        console.log("error", error);
+      } finally {
+        if (isMounted) {
+          // setLoading(false);
+        }
       }
+    };
 
-      console.log("trips: ", tripss);
-      console.log("originDestination: ", originDestination);
+    getData();
 
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      if (isMounted) {
-        setLoading(false);
-      }
-    }
-  };
-
-  getData();
-
-  return () => {
-    isMounted = false;
-  };
-}, []);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleAddTrip = async (e) => {
     e.preventDefault();
@@ -115,7 +134,7 @@ useEffect(() => {
     )
       return;
 
-      const departureDateTime = `${formData.departureDate}T${formData.departureTime}:00`;
+    const departureDateTime = `${formData.departureDate}T${formData.departureTime}:00`;
 
     const newTrip = {
       origin: formData.origin,
@@ -123,7 +142,7 @@ useEffect(() => {
       distance: formData.distance || "N/A",
       fare: parseFloat(formData.fare),
       departure_time: departureDateTime,
-      bus_name: formData.bus_name
+      bus_name: formData.bus_name,
     };
     console.log("insert", newTrip);
     AdminFunction.createTrip(newTrip);
@@ -149,9 +168,14 @@ useEffect(() => {
   //   });
   // };
 
+  const trip = trips.find((t) => t.id === selectedTrip);
+
   const handleUpdateTime = () => {
     if (!selectedTrip || !editTime) return;
-    updateTripDepartureTime(selectedTrip.id, editTime);
+    const date = getDepartureDate(trip);
+    const newDepartureTs = `${date}T${editTime}:00+08:00`;
+    AdminFunction.updateTripDeparture(selectedTrip, newDepartureTs);
+    console.log("edited time", selectedTrip, newDepartureTs);
     setShowEditModal(false);
     setEditTime("");
     setSelectedTrip(null);
@@ -160,7 +184,7 @@ useEffect(() => {
   };
 
   const handleCancelTrip = (trip) => {
-    const success = cancelTrip(trip.id);
+    const success = AdminFunction.canDelete(trip.id);
     if (success) {
       setSelectedTrip(null);
       setRefresh((r) => r + 1);
@@ -171,19 +195,31 @@ useEffect(() => {
   };
 
   const openEditModal = (trip) => {
-    setSelectedTrip(trip);
-    setEditTime(trip.departureTime);
+    setSelectedTrip(trip.id);
+    setEditTime(getDepartureTime(trip));
     setShowEditModal(true);
   };
 
   const TripAdminCard = ({ trip, isPast }) => {
-    const bookingCount = getTripBookings(trip.id).length;
+    const bookingCount = trip?.bookingCount ?? 0;
+    const originLabel = getOriginLabel(trip);
+    const destinationLabel = getDestinationLabel(trip);
+    const departureDate = getDepartureDate(trip);
+    const departureTime = getDepartureTime(trip);
     return (
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -4, scale: 1.01 }}
-        onClick={() => setSelectedTrip(trip)}
+        onClick={() =>
+          setSelectedTrip({
+            ...trip,
+            totalSeats: trip?.totalSeats ?? 50,
+            seatsOccupied: trip?.seatsOccupied ?? [],
+            departureDate: departureDate ?? trip?.departureDate,
+            departureTime: departureTime ?? trip?.departureTime,
+          })
+        }
         className="admin-trip-card"
       >
         <div className="admin-trip-card-inner">
@@ -192,12 +228,12 @@ useEffect(() => {
               <MapPin />
             </div>
             <div className="admin-card-route-names">
-              <span className="admin-card-route-name">{trip.origin}</span>
+              <span className="admin-card-route-name">{originLabel}</span>
               <ArrowRight className="admin-card-route-arrow" />
-              <span className="admin-card-route-name">{trip.destination}</span>
+              <span className="admin-card-route-name">{destinationLabel}</span>
             </div>
           </div>
-          <p className="admin-card-bus">{trip.busName}</p>
+          <p className="admin-card-bus">{trip.bus_name ?? trip.busName}</p>
           <div className="admin-card-meta">
             <div>
               <div className="admin-card-meta-label">
@@ -209,9 +245,12 @@ useEffect(() => {
             <div>
               <div className="admin-card-meta-label">
                 <Clock />
-                <span>Duration</span>
+                <span>Departure</span>
               </div>
-              <p className="admin-card-meta-value">{trip.travelTime}</p>
+              <p className="admin-card-meta-value">
+                {departureDate}
+                {departureTime ? ` · ${departureTime}` : ""}
+              </p>
             </div>
             <div style={{ textAlign: "right" }}>
               <span className="admin-card-meta-label">
@@ -222,13 +261,12 @@ useEffect(() => {
           </div>
           <div className="admin-card-footer">
             <div className="admin-card-footer-left">
-              <strong>{trip.departureDate}</strong>
-              {" · "}
-              {trip.departureTime}
+              <strong>{departureDate}</strong>
+              {departureTime ? ` · ${departureTime}` : ""}
             </div>
             <div className="admin-card-footer-right">
               <span className="admin-card-booking-count">
-                {bookingCount} booking{bookingCount !== 1 ? "s" : ""}
+                {/* {bookingCount} booking{bookingCount !== 1 ? "s" : ""} */}
               </span>
               {!isPast && (
                 <div
@@ -242,6 +280,7 @@ useEffect(() => {
                     <Edit3 />
                   </button>
                   <button
+                    type="submit"
                     onClick={() => handleCancelTrip(trip)}
                     className="admin-card-action-btn admin-card-action-btn--delete"
                   >
@@ -258,7 +297,11 @@ useEffect(() => {
 
   // Trip detail view
   if (selectedTrip && !showEditModal) {
-    const bookings = getTripBookings(selectedTrip.id);
+    const bookings = [];
+    const originLabel = getOriginLabel(selectedTrip);
+    const destinationLabel = getDestinationLabel(selectedTrip);
+    const departureDate = getDepartureDate(selectedTrip);
+    const departureTime = getDepartureTime(selectedTrip);
     return (
       <div className="admin-page">
         <Navbar />
@@ -277,9 +320,11 @@ useEffect(() => {
             </button>
             <span className="admin-detail-label">Trip Details</span>
             <h1 className="admin-detail-title">
-              {selectedTrip.origin} → {selectedTrip.destination}
+              {originLabel} → {destinationLabel}
             </h1>
-            <p className="admin-detail-bus">{selectedTrip.busName}</p>
+            <p className="admin-detail-bus">
+              {selectedTrip.bus_name ?? selectedTrip.busName}
+            </p>
           </motion.div>
 
           <div className="admin-detail-grid">
@@ -291,8 +336,8 @@ useEffect(() => {
               <div className="admin-detail-card">
                 <h2>Seat Layout</h2>
                 <SeatSelector
-                  totalSeats={selectedTrip.totalSeats}
-                  occupiedSeats={selectedTrip.seatsOccupied}
+                  totalSeats={selectedTrip.totalSeats ?? 50}
+                  occupiedSeats={selectedTrip.seatsOccupied ?? []}
                   selectedSeats={[]}
                   onSeatToggle={() => {}}
                 />
@@ -316,16 +361,14 @@ useEffect(() => {
                     <MapPin style={{ color: "hsl(0 89% 41%)" }} />
                     <div>
                       <p className="admin-info-label">Origin</p>
-                      <p className="admin-info-value">{selectedTrip.origin}</p>
+                      <p className="admin-info-value">{originLabel}</p>
                     </div>
                   </div>
                   <div className="admin-info-item">
                     <MapPin style={{ color: "hsl(24 100% 50%)" }} />
                     <div>
                       <p className="admin-info-label">Destination</p>
-                      <p className="admin-info-value">
-                        {selectedTrip.destination}
-                      </p>
+                      <p className="admin-info-value">{destinationLabel}</p>
                     </div>
                   </div>
                   <div className="admin-info-item">
@@ -342,8 +385,8 @@ useEffect(() => {
                     <div>
                       <p className="admin-info-label">Departure</p>
                       <p className="admin-info-value">
-                        {selectedTrip.departureDate} ·{" "}
-                        {selectedTrip.departureTime}
+                        {departureDate}
+                        {departureTime ? ` · ${departureTime}` : ""}
                       </p>
                     </div>
                   </div>
@@ -351,7 +394,9 @@ useEffect(() => {
                     <Bus style={{ color: "hsl(0 0% 40%)" }} />
                     <div>
                       <p className="admin-info-label">Bus Name</p>
-                      <p className="admin-info-value">{selectedTrip.busName}</p>
+                      <p className="admin-info-value">
+                        {selectedTrip.bus_name ?? selectedTrip.busName}
+                      </p>
                     </div>
                   </div>
                   <div className="admin-info-item">
@@ -385,15 +430,15 @@ useEffect(() => {
                   <div className="admin-availability-row">
                     <span>Occupied</span>
                     <span>
-                      {selectedTrip.seatsOccupied.length} /{" "}
-                      {selectedTrip.totalSeats}
+                      {(selectedTrip.seatsOccupied ?? []).length} /{" "}
+                      {selectedTrip.totalSeats ?? 50}
                     </span>
                   </div>
                   <div className="admin-availability-row">
                     <span>Available</span>
                     <span>
-                      {selectedTrip.totalSeats -
-                        selectedTrip.seatsOccupied.length}
+                      {(selectedTrip.totalSeats ?? 50) -
+                        (selectedTrip.seatsOccupied ?? []).length}
                     </span>
                   </div>
                 </div>
@@ -432,7 +477,7 @@ useEffect(() => {
 
   return (
     <div className="admin-page">
-      <Navbar />
+      <NavbarAdmin />
 
       <AnimatePresence>
         {notification && (
@@ -483,7 +528,7 @@ useEffect(() => {
             >
               {tab === "ongoing" ? "Ongoing Trips" : "Completed Trips"}
               <span className="admin-tab-count">
-                {/* {tab === "ongoing" ? upcomingTrips.length : pastTrips.length} */}
+                {tab === "ongoing" ? upcomingTrips.length : pastTrips.length}
               </span>
             </button>
           ))}
@@ -498,7 +543,7 @@ useEffect(() => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {/* {upcomingTrips.length > 0 ? (
+              {upcomingTrips.length > 0 ? (
                 <div className="admin-trips-grid">
                   {upcomingTrips.map((trip) => (
                     <TripAdminCard key={trip.id} trip={trip} />
@@ -506,7 +551,7 @@ useEffect(() => {
                 </div>
               ) : (
                 <p className="admin-empty">No upcoming trips.</p>
-              )} */}
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -559,39 +604,48 @@ useEffect(() => {
               <div>
                 <div className="admin-form-group">
                   <label className="admin-form-label">Origin</label>
-                    <select
-                      name="origin"
-                      className="admin-form-input"
-                      value={formData.origin}
-                      onChange={(e) =>
-                        setFormData((p) => ({ ...p, origin: e.target.value }))
-                      }
-                    >
-                      <option value="">Select origin</option>
-                      {originDesti.map((origin) => (
-                        <option key={origin.location_id} value={origin.location_id}>
-                          {origin.city_name}
-                        </option>
-                      ))}
-                    </select>
+                  <select
+                    name="origin"
+                    className="admin-form-input"
+                    value={formData.origin}
+                    onChange={(e) =>
+                      setFormData((p) => ({ ...p, origin: e.target.value }))
+                    }
+                  >
+                    <option value="">Select origin</option>
+                    {originDesti.map((origin) => (
+                      <option
+                        key={origin.location_id}
+                        value={origin.location_id}
+                      >
+                        {origin.city_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="admin-form-group">
                   <label className="admin-form-label">Destination</label>
-                    <select
-                      name="destination"
-                      className="admin-form-input"
-                      value={formData.destination}
-                      onChange={(e) =>
-                        setFormData((p) => ({ ...p, destination: e.target.value }))
-                      }
-                    >
-                      <option value="">Select destination</option>
-                      {originDesti.map((destination) => (
-                        <option key={destination.location_id} value={destination.location_id}>
-                          {destination.city_name}
-                        </option>
-                      ))}
-                    </select>
+                  <select
+                    name="destination"
+                    className="admin-form-input"
+                    value={formData.destination}
+                    onChange={(e) =>
+                      setFormData((p) => ({
+                        ...p,
+                        destination: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Select destination</option>
+                    {originDesti.map((destination) => (
+                      <option
+                        key={destination.location_id}
+                        value={destination.location_id}
+                      >
+                        {destination.city_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 {[
                   {
@@ -662,7 +716,11 @@ useEffect(() => {
                 >
                   Cancel
                 </button>
-                <button type="submit" onClick={handleAddTrip} className="admin-modal-submit">
+                <button
+                  type="submit"
+                  onClick={handleAddTrip}
+                  className="admin-modal-submit"
+                >
                   <Plus />
                   Add Trip
                 </button>
@@ -705,13 +763,13 @@ useEffect(() => {
                 </button>
               </div>
               <p className="admin-modal-trip-info">
-                {selectedTrip.origin} → {selectedTrip.destination} ·{" "}
-                {selectedTrip.departureDate}
+                {getOriginLabel(trip)} → {getDestinationLabel(trip)} ·{" "}
+                {getDepartureDate(trip)}
               </p>
               <div className="admin-form-group">
                 <label className="admin-form-label">New Departure Time</label>
                 <input
-                  type="text"
+                  type="time"
                   placeholder="e.g. 07:00 AM"
                   value={editTime}
                   onChange={(e) => setEditTime(e.target.value)}
@@ -729,6 +787,7 @@ useEffect(() => {
                   Cancel
                 </button>
                 <button
+                  type="submit"
                   onClick={handleUpdateTime}
                   className="admin-modal-submit"
                 >

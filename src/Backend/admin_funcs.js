@@ -82,7 +82,7 @@ export async function deleteTripIfNoBookings(trip_id) {
 
 export async function updateTripDeparture(trip_id, departure_time) {
   const { error } = await supabase
-    .from("trips_tbl")
+    .from("trips")
     .update({
       departure_time: departure_time,
     })
@@ -94,4 +94,42 @@ export async function updateTripDeparture(trip_id, departure_time) {
   }
 
   return true;
+}
+
+export async function canDelete(trip_id) {
+  const { data, error } = await supabase
+    .from("seats")
+    .select("id, taken")
+    .eq("trip_id", trip_id);
+
+  if (error) {
+    console.log("error", error);
+    return error;
+  }
+
+  const hasTakenSeat = data.some((seat) => seat.taken === true);
+
+  if (hasTakenSeat) {
+    console.log("some seats are taken. not allowed to delete");
+    return false;
+  } else {
+    await supabase.from("trips").delete().eq("id", trip_id);
+    return !hasTakenSeat;
+  }
+}
+
+export async function adminLogin(email, password) {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .eq("password", password)
+    .single();
+
+    if (error) {
+      console.log("errorboo", error);
+      return null;
+    }
+
+  return data;
 }

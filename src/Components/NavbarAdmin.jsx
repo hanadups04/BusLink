@@ -36,10 +36,10 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/trips", label: "Trips" },
-    { to: "/myBookings", label: "My Bookings" },
-    // { to: "/admin", label: "Admin" },
+    // { to: "/", label: "Home" },
+    // { to: "/trips", label: "Trips" },
+    // { to: "/myBookings", label: "My Bookings" },
+    { to: "/admin", label: "Admin" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -93,7 +93,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className="navbar-login-link">
+              <Link to="/adminLogin" className="navbar-login-link">
                 Login
               </Link>
               <Link to="/register" className="navbar-register-link">
@@ -148,7 +148,7 @@ const Navbar = () => {
                 ) : (
                   <>
                     <Link
-                      to="/login"
+                      to="/adminLogin"
                       onClick={() => setMobileOpen(false)}
                       className="navbar-login-link"
                     >
