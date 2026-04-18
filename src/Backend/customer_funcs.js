@@ -1,5 +1,22 @@
 import { supabase } from "../../supabaseClient";
 
+function parseTimestamp(ts) {
+  return new Date(ts.replace(" ", "T"));
+}
+
+function formatDateTime(ts) {
+  const date = parseTimestamp(ts);
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila", // important for PH apps
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export async function createUser(data) {
   const { error } = await supabase.from("users").insert({
     email: data.Email,
@@ -60,18 +77,27 @@ export async function getTrips() {
 
 }
 
-export async function createPayment(data) {
-  const { error } = await supabase.from("payments").insert({
-    trip_id: data.trip_id,
-    seat_id: data.seat_id,
-    status: data.status,
-    paid_amount: data.paid_amount,
-    payee_id: data.payee_id,
+export async function createPayment({
+  trip_id,
+  seat_id,
+  status,
+  paid_amount,
+  payee_id,
+}) {
+  const { error } = await supabase.from("payment").insert({
+    trip_id: trip_id,
+    seat_id: seat_id,
+    status: status,
+    paid_amount: paid_amount,
+    payee_id: payee_id,
   });
 
   if (error) {
     console.log("error moy ay: ", error);
+    return error;
   }
+
+  return 1;
 }
 
 export async function createBooking({
@@ -188,21 +214,4 @@ export async function getTripById(trip_id) {
   };
   console.log("dataseat is: ", formattedData);
   return formattedData;
-}
-
-function parseTimestamp(ts) {
-  return new Date(ts.replace(" ", "T"));
-}
-
-function formatDateTime(ts) {
-  const date = parseTimestamp(ts);
-
-  return date.toLocaleString("en-PH", {
-    timeZone: "Asia/Manila", // important for PH apps
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }
