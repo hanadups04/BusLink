@@ -116,10 +116,9 @@ const MyBookingsPage = () => {
               onClick={() => setSelectedBooking(null)}
               className="bookings-back-btn"
             >
-              <ArrowLeft style={{ width: 16, height: 16 }} />
-              Back to Bookings
+              <ArrowLeft style={{ width: 16, height: 16 }} /> BACK TO{" "}
             </button>
-            <span className="label">Booking {selectedBooking.trip_id}</span>
+            <span className="label"> Booking {selectedBooking.trip_id}</span>
             <h1>
               {selectedBooking.trip.origin.city_name} →{" "}
               {selectedBooking.trip.destination.city_name}

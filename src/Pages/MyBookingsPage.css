@@ -151,6 +151,14 @@
   gap: 1.5rem;
 }
 
+.bookings-back-btn{
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: hsl(0 89% 41%);
+  font-weight: BOLD;
+  font-size: 12px;
+}
+
 @media (min-width: 768px) {
   .bookings-grid { grid-template-columns: repeat(2, 1fr); }
 }
