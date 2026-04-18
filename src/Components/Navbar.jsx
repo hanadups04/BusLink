@@ -12,6 +12,21 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const protectedRoutes = ["/trips", "/myBookings"];
+
+  const handleProtectedNav = (e, to) => {
+    const storedUser = localStorage.getItem("buslink_current_user");
+    const hasUser = currentUser || storedUser;
+
+    if (protectedRoutes.includes(to) && !hasUser) {
+      e.preventDefault();
+      alert("Please login first to continue.");
+      return;
+    }
+
+    setMobileOpen(false);
+  };
+
   useEffect(() => {
     const checkUser = () => {
       const stored = localStorage.getItem("buslink_current_user");
@@ -61,6 +76,7 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
+              onClick={(e) => handleProtectedNav(e, link.to)}
               className={`navbar-link ${isActive(link.to) ? "navbar-link--active" : ""}`}
             >
               {link.label}
@@ -128,7 +144,7 @@ const Navbar = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={(e) => handleProtectedNav(e, link.to)}
                   className={`navbar-mobile-link ${isActive(link.to) ? "navbar-mobile-link--active" : ""}`}
                 >
                   {link.label}

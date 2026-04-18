@@ -193,9 +193,22 @@ const BookingPage = () => {
       ),
     );
 
+    const paymentUpdates = await Promise.all(
+      finalPassengers.map((p) =>
+        Read.createPayment({
+          trip_id: id,
+          seat_id: p.seatId,
+          status: "Paid",
+          paid_amount: p.fare,
+          payee_id: currentUser,
+        }),
+      ),
+    );
+
     const allSeatsUpdated = seatUpdates.every(Boolean);
     const allbooking = bookingUpdates.every(Boolean);
-    if (!allSeatsUpdated || !allbooking) {
+    const allPayment = paymentUpdates.every(Boolean);
+    if (!allSeatsUpdated || !allbooking || !allPayment) {
       console.log("Failed to book all seats. Please try again.");
       return;
     }
